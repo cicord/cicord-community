@@ -32,20 +32,20 @@ spec:
   everyone:
     permissions: [AddReactions, AttachFiles, ChangeNickname, Connect, CreateEvents, CreateExpressions, CreateInstantInvite, CreatePrivateThreads, CreatePublicThreads, EmbedLinks, MentionEveryone, ReadMessageHistory, RequestToSpeak, SendMessages, SendMessagesInThreads, SendPolls, SendVoiceMessages, Speak, Stream, UseApplicationCommands, UseEmbeddedActivities, UseExternalApps, UseExternalEmojis, UseExternalSounds, UseExternalStickers, UseSoundboard, UseVAD, ViewChannel]
   categories:
-    salons-textuels:
+    community:
       name: Salons textuels
       position: 0
-    salons-vocaux:
+    voice:
       name: Salons vocaux
       position: 1
   channels:
     general:
       name: général
       type: text
-      category: salons-textuels
+      category: community
       position: 0
-    general-2:
+    lounge:
       name: Général
       type: voice
-      category: salons-vocaux
+      category: voice
       position: 0
