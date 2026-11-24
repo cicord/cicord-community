@@ -15,7 +15,7 @@ of it.
 | [`cicord.yaml`](cicord.yaml) | The project: tracked branch, runtime URL, write-back policies. |
 | [`servers/cicord.yaml`](servers/cicord.yaml) | The server: profile, Community settings, roles, categories, channels and their permissions, AutoMod, native onboarding, welcome screen. |
 | [`bots/cicord/bot.yaml`](bots/cicord/bot.yaml) | The bot: its intents and its plugin instances (grants and settings). |
-| [`cicord.lock`](cicord.lock) | The official plugins it runs (welcome, audit-log, reaction-roles, tickets), from the signed [cicord-plugins](https://github.com/cicord/cicord-plugins) registry, pinned to an exact commit and integrity. |
+| [`cicord.lock`](cicord.lock) | The official plugins it runs (welcome, audit-log, reaction-roles, tickets, moderation, polls, github-releases), from the signed [cicord-plugins](https://github.com/cicord/cicord-plugins) registry, pinned to an exact commit and integrity. |
 
 Keys in the YAML (`maintainer`, `general`, `mod-log`…) are stable identifiers; display names
 (`name:`) can change freely. Rename a key with `cicord mv`, never by hand, so the Discord

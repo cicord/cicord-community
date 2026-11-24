@@ -4,8 +4,7 @@
 # (github.com/cicord/cicord-plugins, signed index), pinned to an exact commit and integrity in
 # cicord.lock (`cicord plugin add` / `cicord plugin update`). Grants are the capabilities each
 # manifest requests: Cicord requires every one of them to be granted, and none beyond them.
-# moderation, polls and github-releases come in a follow-up, once their 0.1.1 / 0.1.0 releases
-# (mention and role-hierarchy hardening) are published and the runtime is updated.
+# moderation and polls need Cicord f50946a or later (role hierarchy and mention lists in the SDK).
 # Reference: https://cicord.dev/docs/configuration/bot/ and https://cicord.dev/docs/plugins/official/
 
 apiVersion: cicord.dev/v1alpha1
@@ -23,7 +22,8 @@ spec:
     activity: { type: watching, name: the config repo }
   servers: [cicord]
   # The plugins' manifests already declare their intents; they are listed here so that the
-  # privileged one is visible in review. ServerMembers (privileged): welcome and audit-log. No plugin here needs MessageContent: none of them reads what members write.
+  # privileged one is visible in review. ServerMembers (privileged): welcome, moderation and
+  # audit-log. No plugin here needs MessageContent: none of them reads what members write.
   intents: [ServerMessages, ServerMembers]
   plugins:
     # Greets new members in #general and gives them the Member role.
@@ -46,6 +46,9 @@ spec:
       config:
         channel: mod-log
         ignoredChannels: [staff, mod-log]
+        events:
+          moderation: false       # the moderation plugin already posts each case to #mod-log
+          polls: false
 
     # Opt-in roles panel in #welcome. Never list a role with permissions here.
     - name: reaction-roles
@@ -88,3 +91,50 @@ spec:
           description: Report a member or a message, or ask something you would rather not post in public. Only you, the maintainers and the moderators see a ticket. Security vulnerabilities go to GitHub (SECURITY.md), not here.
           buttonLabel: Open a ticket
         maxOpenPerMember: 1
+
+    # /warn, /timeout, /kick, /ban, escalation and flood protection. Cases are logged to #mod-log.
+    # A moderator can only act on members whose highest role is below theirs, never on staff
+    # (only an admin can) nor on the server owner.
+    - name: moderation
+      source: cicord/moderation
+      version: ^0.1.1
+      grants: [discord.messages.send, discord.messages.manage, discord.channels.read,
+               discord.members.read, discord.members.moderate, discord.dm.send, storage.kv,
+               http.fetch, portal.routes, events.publish]
+      config:
+        logChannel: mod-log
+        warningDays: 30
+        escalation:
+          - { warnings: 3, action: timeout, durationMinutes: 60 }
+          - { warnings: 5, action: kick }
+        flood:
+          exemptRoles: [maintainer, moderator]
+        # Joins, leaves and member updates are logged by audit-log (same channel).
+        log: { joins: false, leaves: false, updates: false }
+
+    # /poll in #general and #development. Members can only ping a member or a mentionable role;
+    # maintainers and moderators can ping any role. @everyone never notifies.
+    - name: polls
+      source: cicord/polls
+      version: ^0.1.1
+      grants: [discord.messages.send, discord.messages.read, discord.channels.read,
+               discord.threads.manage, storage.kv, scheduler, events.publish, portal.routes]
+      config:
+        channels: [general, development]
+        managerRoles: [maintainer, moderator]
+
+    # Release notes of cicord/cicord in #changelog, pinging the opt-in Changelog ping role
+    # (only that role: it is not mentionable by members). Checked every 15 minutes, without a
+    # GitHub token (4 requests per hour, well under GitHub's 60 per hour).
+    - name: github-releases
+      source: cicord/github-releases
+      version: ^0.1.0
+      grants: [discord.messages.send, discord.channels.read, storage.kv, scheduler, http.fetch]
+      config:
+        feeds:
+          - repo: cicord/cicord
+            channel: changelog
+            mentionRole: changelog-ping
+            label: Cicord
+        pollMinutes: 15
+        announceExisting: false   # announce releases published from now on only

@@ -13,6 +13,50 @@ plugins:
             - storage.kv
             - scheduler
             - events.subscribe
+    cicord/github-releases:
+        version: 0.1.0
+        repo: https://github.com/cicord/cicord-plugins
+        path: plugins/github-releases
+        commit: 1095d841b81073cfd08725d56f50154b3f5a02a8
+        integrity: sha256-5vLWma5QVngUs4o+fgTGUnpmLzXldrxTc7Vq9FLJARo=
+        capabilities:
+            - discord.messages.send
+            - discord.channels.read
+            - storage.kv
+            - scheduler
+            - http.fetch
+    cicord/moderation:
+        version: 0.1.1
+        repo: https://github.com/cicord/cicord-plugins
+        path: plugins/moderation
+        commit: 448db6cdc70f6763aea8de644b74334ceb458d2d
+        integrity: sha256-b/GkwwN3XXN1MYjtuA1rTj1Q/+iVyymv41Wol+0V1Y8=
+        capabilities:
+            - discord.messages.send
+            - discord.messages.manage
+            - discord.channels.read
+            - discord.members.read
+            - discord.members.moderate
+            - discord.dm.send
+            - storage.kv
+            - http.fetch
+            - portal.routes
+            - events.publish
+    cicord/polls:
+        version: 0.1.1
+        repo: https://github.com/cicord/cicord-plugins
+        path: plugins/polls
+        commit: 448db6cdc70f6763aea8de644b74334ceb458d2d
+        integrity: sha256-ixFJF3mCzgNkXXDVB96a2x2f6YP2wjlefPtsXGY9drk=
+        capabilities:
+            - discord.messages.send
+            - discord.messages.read
+            - discord.channels.read
+            - discord.threads.manage
+            - storage.kv
+            - scheduler
+            - events.publish
+            - portal.routes
     cicord/reaction-roles:
         version: 0.1.0
         repo: https://github.com/cicord/cicord-plugins
