@@ -1,0 +1,51 @@
+# Imported from the Discord server "Cicord" (1574757803220803697) by `cicord import`.
+# Keys (role, category and channel names below spec) are stable identifiers: rename them
+# with `cicord mv`, change display names freely.
+
+apiVersion: cicord.dev/v1alpha1
+kind: Server
+metadata:
+  name: cicord
+spec:
+  discordId: "1574757803220803697"
+  profile:
+    name: Cicord
+    verificationLevel: none
+    defaultNotifications: allMessages
+    explicitContentFilter: disabled
+    preferredLocale: en-US
+    systemChannel: general
+    systemChannelFlags:
+      welcomeMessages: true
+      welcomeStickerReplies: true
+      boostMessages: true
+      setupTips: true
+      roleSubscriptionMessages: true
+      roleSubscriptionStickerReplies: true
+  afk:
+    timeout: 300
+  # Safe defaults: drift is only reported, nothing is ever deleted.
+  syncPolicy:
+    selfHeal: false
+    prune: false
+    deletionProtection: true
+  everyone:
+    permissions: [AddReactions, AttachFiles, ChangeNickname, Connect, CreateEvents, CreateExpressions, CreateInstantInvite, CreatePrivateThreads, CreatePublicThreads, EmbedLinks, MentionEveryone, ReadMessageHistory, RequestToSpeak, SendMessages, SendMessagesInThreads, SendPolls, SendVoiceMessages, Speak, Stream, UseApplicationCommands, UseEmbeddedActivities, UseExternalApps, UseExternalEmojis, UseExternalSounds, UseExternalStickers, UseSoundboard, UseVAD, ViewChannel]
+  categories:
+    salons-textuels:
+      name: Salons textuels
+      position: 0
+    salons-vocaux:
+      name: Salons vocaux
+      position: 1
+  channels:
+    general:
+      name: général
+      type: text
+      category: salons-textuels
+      position: 0
+    general-2:
+      name: Général
+      type: voice
+      category: salons-vocaux
+      position: 0

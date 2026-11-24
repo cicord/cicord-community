@@ -1,0 +1,5 @@
+.cicord/
+*.db
+*.db-*
+.env
+node_modules/
