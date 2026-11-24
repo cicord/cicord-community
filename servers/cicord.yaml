@@ -1,6 +1,8 @@
-# Imported from the Discord server "Cicord" (1574757803220803697) by `cicord import`.
-# Keys (role, category and channel names below spec) are stable identifiers: rename them
-# with `cicord mv`, change display names freely.
+# yaml-language-server: $schema=https://raw.githubusercontent.com/cicord/cicord/main/spec/schemas/server.schema.json
+#
+# The official Cicord community server. Keys (role, category and channel names under spec)
+# are stable identifiers: rename them with `cicord mv`, change display names freely.
+# Reference: https://cicord.dev/docs/configuration/server/
 
 apiVersion: cicord.dev/v1alpha1
 kind: Server
@@ -10,42 +12,361 @@ spec:
   discordId: "1574757803220803697"
   profile:
     name: Cicord
-    verificationLevel: none
-    defaultNotifications: allMessages
-    explicitContentFilter: disabled
+    description: The community of Cicord, GitOps for Discord. Contributors, plugin authors, self-hosters and users.
+    # Community needs at least "low". "medium" also asks for an account older than 5 minutes,
+    # which stops most throwaway spam accounts. It does not apply to members who have a role.
+    verificationLevel: medium
+    explicitContentFilter: allMembers
+    defaultNotifications: onlyMentions
     preferredLocale: en-US
     systemChannel: general
     systemChannelFlags:
-      welcomeMessages: true
-      welcomeStickerReplies: true
+      welcomeMessages: false            # the welcome plugin greets new members
+      welcomeStickerReplies: false
       boostMessages: true
-      setupTips: true
-      roleSubscriptionMessages: true
-      roleSubscriptionStickerReplies: true
+      setupTips: false
+      roleSubscriptionMessages: false
+      roleSubscriptionStickerReplies: false
   afk:
     timeout: 300
-  # Safe defaults: drift is only reported, nothing is ever deleted.
+
+  community:
+    enabled: true
+    rulesChannel: rules
+    updatesChannel: discord-updates     # Discord's moderator news, kept out of #staff
+    safetyAlertsChannel: mod-log        # raid and DM spam alerts, next to AutoMod alerts
+
+  # Drift is reverted: this repository is the source of truth, and structural changes go
+  # through a reviewed pull request. Removed keys are only unmanaged (left in Discord), and
+  # nothing is ever deleted.
   syncPolicy:
-    selfHeal: false
+    selfHeal: true
     prune: false
     deletionProtection: true
+
+  # @everyone is the base member: Discord's native onboarding only accepts default channels
+  # that @everyone can see, and needs 5 of them where @everyone can send messages. Spam is
+  # stopped by AutoMod below; the verification level only holds back newcomers until they get
+  # a role (the welcome plugin gives Member on join). No invites (CreateInstantInvite) and no
+  # @everyone pings (MentionEveryone): the official invite link is created by the maintainers.
   everyone:
-    permissions: [AddReactions, AttachFiles, ChangeNickname, Connect, CreateEvents, CreateExpressions, CreateInstantInvite, CreatePrivateThreads, CreatePublicThreads, EmbedLinks, MentionEveryone, ReadMessageHistory, RequestToSpeak, SendMessages, SendMessagesInThreads, SendPolls, SendVoiceMessages, Speak, Stream, UseApplicationCommands, UseEmbeddedActivities, UseExternalApps, UseExternalEmojis, UseExternalSounds, UseExternalStickers, UseSoundboard, UseVAD, ViewChannel]
+    permissions: [ViewChannel, ReadMessageHistory, AddReactions, SendMessages, SendMessagesInThreads,
+                  UseApplicationCommands, ChangeNickname, Connect, Speak, UseVAD]
+
+  roles:
+    maintainer:
+      name: Maintainer
+      color: "#5865f2"
+      hoist: true
+      # Everything needed to run the server, without Administrator: channel privacy
+      # (staff channels, tickets) still applies, and nobody can grant Administrator.
+      permissions: [ManageServer, ManageRoles, ManageChannels, ManageWebhooks, ManageExpressions,
+                    CreateExpressions, ManageEvents, CreateEvents, ManageThreads, ManageMessages,
+                    ManageNicknames, KickMembers, BanMembers, ModerateMembers, ViewAuditLog,
+                    ViewServerInsights, MentionEveryone, CreateInstantInvite, MuteMembers,
+                    DeafenMembers, MoveMembers, PrioritySpeaker]
+    moderator:
+      name: Moderator
+      color: "#eb459e"
+      hoist: true
+      permissions: [KickMembers, BanMembers, ModerateMembers, ManageMessages, ManageThreads,
+                    ManageNicknames, ViewAuditLog, MuteMembers, DeafenMembers, MoveMembers]
+    contributor:
+      name: Contributor
+      color: "#f0b232"
+      hoist: true
+      # Given by the maintainers (merged pull requests), never self-assigned: it opens #contributors.
+    plugin-author:
+      name: Plugin author
+      color: "#23a55a"
+      # Self-assigned (onboarding, reaction-roles panel in #welcome).
+    changelog-ping:
+      name: Changelog ping
+      # Opt-in (onboarding, reaction-roles panel): pinged in #changelog for every release.
+      # Not mentionable: only the bot (which posts the release notes) can ping it, so members
+      # can't mass-ping every subscriber.
+      mentionable: false
+    member:
+      name: Member
+      # Given to every new member by the welcome plugin. Rich content that spam abuses
+      # (links, files, threads, external emojis…) comes with it: removing it is a light sanction.
+      permissions: [EmbedLinks, AttachFiles, CreatePublicThreads, UseExternalEmojis, UseExternalStickers,
+                    SendVoiceMessages, SendPolls, Stream, UseEmbeddedActivities]
+
+  hierarchy: [maintainer, moderator, contributor, plugin-author, changelog-ping, member]
+
   categories:
-    community:
-      name: Salons textuels
+    start:
+      name: Start
       position: 0
-    voice:
-      name: Salons vocaux
+      # Read-only: only the maintainers (and the bot) post here.
+      overwrites:
+        "@everyone":
+          deny: [SendMessages, SendMessagesInThreads, CreatePublicThreads, CreatePrivateThreads]
+        maintainer:
+          allow: [SendMessages, SendMessagesInThreads, CreatePublicThreads, EmbedLinks, AttachFiles]
+    community:
+      name: Community
       position: 1
+    support:
+      name: Help
+      position: 2
+    dev:
+      name: Development
+      position: 3
+    voice:
+      name: Voice
+      position: 4
+    team:
+      name: Staff
+      position: 5
+      overwrites:
+        "@everyone":
+          deny: [ViewChannel]
+        maintainer:
+          allow: [ViewChannel, SendMessages, EmbedLinks, AttachFiles]
+        moderator:
+          allow: [ViewChannel, SendMessages, EmbedLinks, AttachFiles]
+    tickets:
+      name: Tickets
+      position: 6
+      # Ticket channels are created here by the tickets plugin (plugin-owned, never pruned),
+      # each with its own overwrites: the member who opened it and the staff roles.
+      overwrites:
+        "@everyone":
+          deny: [ViewChannel]
+        maintainer:
+          allow: [ViewChannel]
+        moderator:
+          allow: [ViewChannel]
+
   channels:
+    # ── Start
+    welcome:
+      name: welcome
+      type: text
+      category: start
+      position: 0
+      topic: "Welcome to the Cicord community! Pick your roles below, read #rules, ask in #help. Docs: https://cicord.dev/docs/"
+    rules:
+      name: rules
+      type: text
+      category: start
+      position: 1
+      topic: "Be kind, stay on topic, no spam or self-promotion. Report problems with a ticket in #welcome."
+    announcements:
+      name: announcements
+      type: announcement
+      category: start
+      position: 2
+      topic: News about Cicord and this community.
+    changelog:
+      name: changelog
+      type: announcement
+      category: start
+      position: 3
+      topic: Every Cicord release, posted automatically. Get pinged with the Changelog ping role (#welcome).
+
+    # ── Community (the wizard's text channel, kept: same Discord channel)
     general:
-      name: général
+      name: general
       type: text
       category: community
       position: 0
+      topic: "Talk about Cicord, Discord communities and GitOps. Questions go to #help."
+    showcase:
+      name: showcase
+      type: text
+      category: community
+      position: 1
+      topic: Show what you built with Cicord - servers, plugins, portals, workflows.
+    off-topic:
+      name: off-topic
+      type: text
+      category: community
+      position: 2
+      topic: Anything else, within the rules.
+
+    # ── Help
+    help:
+      name: help
+      type: forum
+      category: support
+      position: 0
+      guidelines: |-
+        One post per question. Search first, then tell us your Cicord version (`cicord version`),
+        what you ran, what you expected and what happened (logs, `cicord validate` or `cicord plan`
+        output). Tag your post, and mark it Solved when it is. Bugs with a reproduction belong in
+        GitHub issues: https://github.com/cicord/cicord/issues - security issues only in private,
+        see SECURITY.md.
+      tags:
+        question: { name: Question, emoji: "❓" }
+        bug: { name: Bug, emoji: "🐛" }
+        self-hosting: { name: Self-hosting, emoji: "🖥️" }
+        plugin: { name: Plugin, emoji: "🧩" }
+        solved: { name: Solved, emoji: "✅" }
+      sortOrder: latestActivity
+      layout: list
+      threadArchiveAfter: 1w
+
+    # ── Development
+    development:
+      name: development
+      type: text
+      category: dev
+      position: 0
+      topic: Working on Cicord itself - design, pull requests, reviews. Start with CONTRIBUTING.md.
+    plugins:
+      name: plugins
+      type: text
+      category: dev
+      position: 1
+      topic: Writing, testing and publishing Cicord plugins (SDK, registries). https://cicord.dev/docs/plugins/overview/
+    contributors:
+      name: contributors
+      type: text
+      category: dev
+      position: 2
+      topic: Contributors' corner - coordination and early discussions.
+      overwrites:
+        "@everyone":
+          deny: [ViewChannel]
+        contributor:
+          allow: [ViewChannel]
+        moderator:
+          allow: [ViewChannel]
+        maintainer:
+          allow: [ViewChannel]
+
+    # ── Voice (the wizard's voice channel, kept: same Discord channel)
     lounge:
-      name: Général
+      name: Lounge
       type: voice
       category: voice
       position: 0
+    pair-programming:
+      name: Pair programming
+      type: voice
+      category: voice
+      position: 1
+
+    # ── Staff
+    staff:
+      name: staff
+      type: text
+      category: team
+      position: 0
+      topic: Maintainers and moderators.
+    mod-log:
+      name: mod-log
+      type: text
+      category: team
+      position: 1
+      topic: Moderation cases, audit log, AutoMod and Discord safety alerts. Written by bots only.
+      overwrites:
+        "@everyone":
+          deny: [ViewChannel]
+        maintainer:
+          allow: [ViewChannel]
+          deny: [SendMessages, SendMessagesInThreads, CreatePublicThreads, CreatePrivateThreads]
+        moderator:
+          allow: [ViewChannel]
+          deny: [SendMessages, SendMessagesInThreads, CreatePublicThreads, CreatePrivateThreads]
+    discord-updates:
+      name: discord-updates
+      type: text
+      category: team
+      position: 2
+      topic: Community updates from Discord.
+
+  automod:
+    mention-spam:
+      name: Mention spam
+      trigger: mentionSpam
+      mentionLimit: 5
+      mentionRaidProtection: true
+      actions:
+        block: { message: Too many mentions in one message. }
+        alert: mod-log
+        timeout: 1h
+      exemptRoles: [maintainer, moderator]
+    spam:
+      name: Suspected spam
+      trigger: spam
+      actions:
+        block: { message: This looks like spam. Contact a moderator if it is not. }
+        alert: mod-log
+      exemptRoles: [maintainer, moderator]
+    invite-links:
+      name: Server invites
+      trigger: keyword
+      regex: ['(discord\.gg|discord(app)?\.com/invite|dsc\.gg)/\S+']
+      actions:
+        block: { message: Invites to other servers are not allowed. Ask a moderator. }
+        alert: mod-log
+      exemptRoles: [maintainer, moderator]
+    scams:
+      name: Scam phrases
+      trigger: keyword
+      keywords: [free nitro, free discord nitro, nitro giveaway, nitro for free, claim your nitro, steam gift card]
+      actions:
+        block: { message: This message looks like a known scam. }
+        alert: mod-log
+        timeout: 10m
+      exemptRoles: [maintainer, moderator]
+    slurs:
+      name: Slurs and sexual content
+      trigger: keywordPreset
+      presets: [slurs, sexualContent]
+      actions:
+        block: { message: Please keep it respectful. }
+        alert: mod-log
+      exemptRoles: [maintainer, moderator]
+
+  # Discord's native onboarding. Default mode: at least 7 default channels, all open to
+  # @everyone, 5 where @everyone can send messages (here: general, showcase, off-topic, help,
+  # development, plugins).
+  onboarding:
+    enabled: true
+    defaultChannels: [welcome, rules, announcements, changelog, general, showcase, off-topic, help,
+                      development, plugins]
+    prompts:
+      - key: interests
+        title: What brings you here?
+        options:
+          - title: Writing plugins
+            description: Get the Plugin author role
+            emoji: "🧩"
+            roles: [plugin-author]
+          - title: Contributing to Cicord
+            description: Code, docs, reviews and pair programming
+            emoji: "🛠️"
+            channels: [development, pair-programming]
+          - title: Hanging out
+            description: The voice lounge
+            emoji: "🎧"
+            channels: [lounge]
+      - key: releases
+        title: Get pinged for new releases?
+        singleSelect: true
+        options:
+          - title: "Yes, ping me in #changelog"
+            description: Get the Changelog ping role
+            emoji: "🔔"
+            roles: [changelog-ping]
+
+  welcomeScreen:
+    enabled: true
+    description: GitOps for Discord - declare your server in git, review changes, let Cicord apply them.
+    channels:
+      - { channel: rules, description: Read the rules, emoji: "📜" }
+      - { channel: help, description: Ask a question, emoji: "❓" }
+      - { channel: general, description: Say hi, emoji: "👋" }
+      - { channel: showcase, description: Show what you built, emoji: "✨" }
+      - { channel: changelog, description: Release notes, emoji: "📦" }
+
+  access:
+    admins:
+      roles: [maintainer]
+    moderators:
+      roles: [moderator]
