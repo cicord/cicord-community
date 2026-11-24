@@ -384,3 +384,37 @@ spec:
       roles: [maintainer]
     moderators:
       roles: [moderator]
+
+  # Community portal (https://community.cicord.dev): the reference portal, themed from YAML
+  # only. Colors are the ones of cicord.dev: blurple for buttons, links and focus, the green
+  # of "in sync" for highlights. @cicord/ui adjusts both for contrast in light and dark.
+  # Reference: https://cicord.dev/docs/portal/customize/
+  portal:
+    theme:
+      primary: "#5865f2"
+      accent: "#3dd68c"
+      logo: ../assets/logo.svg      # the Cicord mark, same file as the cicord.dev favicon
+      mode: system                  # like cicord.dev: the visitor's setting (set explicitly,
+                                    # the reference portal falls back to dark when unset)
+    title: The Cicord community
+    tagline: "GitOps for Discord: declare your server in git, review every change, and let Cicord apply it."
+    description: |
+      This is the community of **Cicord**, the open-source tool that manages Discord servers
+      from a git repository: roles, channels, permissions, AutoMod, onboarding and bot plugins
+      are declared in YAML, reviewed in pull requests, and kept in sync by a Cicord runtime.
+
+      Join us on Discord to:
+
+      - ask questions in `#help` and get help with self-hosting,
+      - share what you built in `#showcase`,
+      - write and publish plugins, or contribute to Cicord itself in `#development`.
+
+      This server is managed by Cicord too: its whole configuration, this page included, is
+      public in [cicord/cicord-community](https://github.com/cicord/cicord-community). Changes
+      are proposed there with a pull request. Members can sign in with Discord to see their
+      roles here.
+    links:
+      - { label: Documentation, url: "https://cicord.dev/docs/", icon: website }
+      - { label: GitHub, url: "https://github.com/cicord/cicord", icon: github }
+      - { label: Join the Discord, url: "https://discord.gg/qTt5S2Fe4m", icon: discord }
+    locale: en                      # the community speaks English (profile.preferredLocale)
