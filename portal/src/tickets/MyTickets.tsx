@@ -3,19 +3,14 @@
  * (`GET /tickets/mine/:id`) and opening a new one from the portal (`POST /tickets`).
  */
 import { isCicordApiError, isSafeUrl } from "@cicord/client";
+import { useRouteMutation, useRouteQuery } from "@cicord/react";
 import { Button, LinkButton, Notice } from "@cicord/ui";
 import { useId, useState, type FormEvent } from "react";
 import { useFormat } from "../format.ts";
 import { useT } from "../i18n/index.tsx";
 import { PageLoading, RequireMember, useDocumentTitle } from "../portal.tsx";
 import { Link, navigate } from "../router.tsx";
-import {
-  LIMITS,
-  TICKET_LABELS,
-  useTicketsMutation,
-  useTicketsQuery,
-  type MyTicket,
-} from "./api.ts";
+import { LIMITS, TICKET_LABELS, type MyTicket } from "./api.ts";
 import {
   BackLink,
   Facts,
@@ -36,7 +31,7 @@ export function MyTickets() {
 
 function MyTicketList() {
   const t = useT();
-  const list = useTicketsQuery("GET /tickets/mine");
+  const list = useRouteQuery("tickets", "GET /tickets/mine");
   const items = list.data?.items ?? [];
   const open = items.filter((i) => i.status === "open");
   const closed = items.filter((i) => i.status === "closed");
@@ -152,7 +147,7 @@ export function MyTicketView({ id }: { id: string }) {
 function MyTicketDetailView({ id }: { id: string }) {
   const t = useT();
   const f = useFormat();
-  const ticket = useTicketsQuery("GET /tickets/mine/:id", { params: { id } });
+  const ticket = useRouteQuery("tickets", "GET /tickets/mine/:id", { params: { id } });
   const d = ticket.data;
   useDocumentTitle(d ? `#${d.number} ${d.subject}` : t.tickets.mineTitle);
 
@@ -265,7 +260,7 @@ function NewTicketForm() {
   const [description, setDescription] = useState("");
   const [label, setLabel] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const create = useTicketsMutation("POST /tickets", {
+  const create = useRouteMutation("tickets", "POST /tickets", {
     onSuccess: (ticket) => navigate(`/tickets/${encodeURIComponent(ticket.id)}`),
   });
   const problems = validate(t, subject, description);

@@ -4,6 +4,7 @@
  * assignment, priority, label, close and reopen.
  */
 import { isCicordApiError, isSafeUrl } from "@cicord/client";
+import { useRouteMutation, useRouteQuery } from "@cicord/react";
 import { Avatar, Button, LinkButton, Notice, renderInline } from "@cicord/ui";
 import { useId, useMemo, useState, type FormEvent } from "react";
 import { useFormat } from "../format.ts";
@@ -15,8 +16,6 @@ import {
   PRIORITIES,
   TICKET_LABELS,
   useOptimisticTicket,
-  useTicketsMutation,
-  useTicketsQuery,
   type Person,
   type Priority,
   type StaffTicket,
@@ -104,14 +103,14 @@ function Queue({ viewer }: { viewer: Member }) {
   const t = useT();
   const id = useId();
   const [filters, update] = useFilters();
-  const staff = useTicketsQuery("GET /staff");
+  const staff = useRouteQuery("tickets", "GET /staff");
   const query: StaffTicketQuery = {
     ...(filters.status === "all" ? {} : { status: filters.status }),
     ...(filters.assignee ? { assignee: filters.assignee } : {}),
     ...(filters.priority ? { priority: filters.priority } : {}),
     ...(filters.label ? { label: filters.label } : {}),
   };
-  const list = useTicketsQuery("GET /tickets", { query });
+  const list = useRouteQuery("tickets", "GET /tickets", { query });
   const items = useMemo(() => sortQueue(list.data?.items ?? []), [list.data]);
   const unassigned = items.filter((i) => i.status === "open" && !i.assignee).length;
   const filtered = !!(
@@ -314,7 +313,7 @@ export function SupportTicket({ id }: { id: string }) {
 function StaffTicketView({ id, viewer }: { id: string; viewer: Member }) {
   const t = useT();
   const f = useFormat();
-  const ticket = useTicketsQuery("GET /tickets/:id", { params: { id } });
+  const ticket = useRouteQuery("tickets", "GET /tickets/:id", { params: { id } });
   const d = ticket.data;
   useDocumentTitle(d ? `#${d.number} ${d.subject}` : t.support.title);
 
@@ -510,7 +509,7 @@ function Conversation({ ticket }: { ticket: StaffTicketDetail }) {
   const id = useId();
   const [content, setContent] = useState("");
   const [touched, setTouched] = useState(false);
-  const reply = useTicketsMutation("POST /tickets/:id/messages", {
+  const reply = useRouteMutation("tickets", "POST /tickets/:id/messages", {
     onSuccess: () => {
       setContent("");
       setTouched(false);
@@ -588,18 +587,18 @@ function Conversation({ ticket }: { ticket: StaffTicketDetail }) {
 function Manage({ ticket, viewer }: { ticket: StaffTicketDetail; viewer: Member }) {
   const t = useT();
   const id = useId();
-  const staff = useTicketsQuery("GET /staff");
+  const staff = useRouteQuery("tickets", "GET /staff");
   const edit = useOptimisticTicket(ticket.id);
   const [error, setError] = useState<unknown>(undefined);
   const [closing, setClosing] = useState(false);
   const [reason, setReason] = useState("");
-  const close = useTicketsMutation("POST /tickets/:id/close", {
+  const close = useRouteMutation("tickets", "POST /tickets/:id/close", {
     onSuccess: () => {
       setClosing(false);
       setReason("");
     },
   });
-  const reopen = useTicketsMutation("POST /tickets/:id/reopen");
+  const reopen = useRouteMutation("tickets", "POST /tickets/:id/reopen");
   const me: Person = {
     id: viewer.me.user.id,
     displayName: viewer.me.member.nick || viewer.me.user.displayName,

@@ -1,8 +1,5 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   // index.html → src/main.tsx is detected by the Vite plugin; tests by the Vitest plugin.
-  "project": ["src/**/*.{ts,tsx}", "test/**/*.{ts,tsx}"],
-  // src/tickets/api.ts mirrors the tickets route contract type for type, including the
-  // types only its own interfaces use.
-  "ignoreExportsUsedInFile": { "interface": true, "type": true }
+  "project": ["src/**/*.{ts,tsx}", "test/**/*.{ts,tsx}"]
 }
