@@ -77,8 +77,8 @@ function HomePanel({ viewer }: { viewer: Viewer }) {
     case "signedOut":
       return (
         <div className="home-login">
-          <h2>{t.home.loggedOutTitle}</h2>
-          <p>{t.home.loggedOut}</p>
+          <h2>{pages.myTickets ? t.home.loggedOutTitle : t.home.loggedOutTitleNoTickets}</h2>
+          <p>{pages.myTickets ? t.home.loggedOut : t.home.loggedOutNoTickets}</p>
           <SignIn />
           <ul className="home-actions home-actions--public">
             <Action

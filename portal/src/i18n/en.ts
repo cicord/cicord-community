@@ -56,6 +56,8 @@ export const en = {
     loggedOutTitle: "Sign in to get help",
     loggedOut:
       "With your Discord account, open a private ticket with the team and follow it from here.",
+    loggedOutTitleNoTickets: "Sign in with Discord",
+    loggedOutNoTickets: "See your member profile and how the server is doing.",
     hello: (name: string) => `Hi ${name}`,
     about: "About",
     links: "Links",
@@ -94,7 +96,7 @@ export const en = {
     activePerDay: "Active members per day",
     activeNote: "Members who wrote, reacted or joined a voice channel that day.",
     peak: "Busiest:",
-    noData: "No data",
+    chartEmpty: "Nothing recorded over this period yet.",
     chartSummary: (title: string, total: string, days: number) =>
       `${title}: ${total} over ${plural(days, "day", "days")}. Use the arrow keys to read a day.`,
     showTable: "Show as a table",

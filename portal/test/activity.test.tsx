@@ -1,3 +1,4 @@
+import type { FetchLike } from "@cicord/client";
 import { fireEvent, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, test } from "vite-plus/test";
@@ -143,4 +144,50 @@ test("members-only activity asks signed-out visitors to sign in", async () => {
 test("public activity is shown to signed-out visitors", async () => {
   renderPortal("/activity", { analytics: "public", signedIn: false });
   expect(await screen.findByRole("list", { name: "Key figures" })).toBeTruthy();
+});
+
+test("a server that just started collecting: zeros and empty sparks", async () => {
+  // As served by a fresh runtime: some sparks empty, members.total with today only.
+  const fresh =
+    (fetch: FetchLike): FetchLike =>
+    async (input, init) => {
+      if (!input.includes("/analytics")) return fetch(input, init);
+      const zeros = [1795046400, 1795132800, 1795219200].map((t) => [t, 0]);
+      const kpi = (metric: string, spark: number[][], value = 0) => ({
+        metric,
+        value,
+        previous: null,
+        spark,
+      });
+      const body = {
+        server: "cicord",
+        period: "7d",
+        from: "2026-11-19T00:00:00Z",
+        to: "2026-11-26T00:00:00Z",
+        since: "2026-11-25T10:00:00Z",
+        kpis: [
+          kpi("members.total", [[1795564800, 1]], 1),
+          kpi("members.joined", zeros),
+          kpi("members.active", []),
+          kpi("messages.sent", zeros),
+          kpi("voice.seconds", zeros),
+          kpi("reactions.added", zeros),
+          kpi("bots.commands", zeros),
+          kpi("members.active.bots", []),
+        ],
+        topChannels: [],
+        topBotCommands: [],
+        heatmap: Array.from({ length: 7 }, () => Array.from({ length: 24 }, () => 0)),
+      };
+      return new Response(JSON.stringify(body), {
+        headers: { "Content-Type": "application/json" },
+      });
+    };
+  renderPortal("/activity", { wrap: fresh });
+  expect(await screen.findByText(/Data starts on Nov 25\./)).toBeTruthy();
+  expect(screen.getAllByText("Nothing recorded over this period yet.")).toHaveLength(2);
+  expect(screen.queryByRole("slider")).toBeNull();
+  expect(screen.getAllByText("No earlier period to compare")).toHaveLength(8);
+  expect(screen.getByText("No messages in public channels over this period.")).toBeTruthy();
+  expect(screen.getByText("No bot commands over this period.")).toBeTruthy();
 });

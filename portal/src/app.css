@@ -1111,6 +1111,16 @@ code {
   position: relative;
   border-radius: var(--cicord-radius-sm);
 }
+.chart__empty {
+  display: grid;
+  place-items: center;
+  min-height: 200px;
+  margin: 0;
+  border-radius: var(--cicord-radius-md);
+  background: var(--cicord-sunken);
+  color: var(--cicord-muted);
+  font-size: 0.875rem;
+}
 .chart__plot svg {
   display: block;
   max-width: 100%;

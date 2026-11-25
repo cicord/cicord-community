@@ -113,7 +113,9 @@ export function DailyChart({ title, points, kind, describe, note }: DailyChartPr
   const labelEvery = Math.max(1, Math.ceil(vals.length / Math.max(2, Math.floor(plotW / 72))));
 
   const total = vals.reduce((a, b) => a + b, 0);
-  const peakIndex = vals.length > 0 ? vals.indexOf(Math.max(...vals)) : -1;
+  // Nothing to draw: no point yet (the collection just started) or only zeros.
+  const empty = total === 0;
+  const peakIndex = empty ? -1 : vals.indexOf(Math.max(...vals));
   const shown = active ?? peakIndex;
   const shownPoint = shown >= 0 ? points[shown] : undefined;
   const activeValue = active === null ? undefined : vals[active];
@@ -134,118 +136,126 @@ export function DailyChart({ title, points, kind, describe, note }: DailyChartPr
           {title}
         </h3>
         {note ? <p className="chart__note">{note}</p> : null}
-        <p className="chart__readout" aria-hidden="true">
-          {shownPoint ? (
-            <>
-              <span className="chart__readout-day">
-                {active === null ? t.activity.peak : null} {f.day(shownPoint[0])}
-              </span>{" "}
-              <strong>{describe(shownPoint[1])}</strong>
-            </>
-          ) : (
-            t.activity.noData
-          )}
-        </p>
+        {shownPoint ? (
+          <p className="chart__readout" aria-hidden="true">
+            {active === null ? `${t.activity.peak} ` : null}
+            {f.day(shownPoint[0])} <strong>{describe(shownPoint[1])}</strong>
+          </p>
+        ) : null}
       </figcaption>
       <div ref={ref} className="chart__plot">
-        <svg
-          width={width}
-          height={height}
-          viewBox={`0 0 ${width} ${height}`}
-          aria-hidden="true"
-          focusable="false"
-        >
-          {ticks.map((tick) => (
-            <g key={tick} className="chart__grid">
-              <line x1={pad.left} x2={width - pad.right} y1={y(tick)} y2={y(tick)} />
-              <text x={pad.left - 8} y={y(tick)} dy="0.32em" textAnchor="end">
-                {f.compact(tick)}
-              </text>
-            </g>
-          ))}
-          {kind === "bars" ? (
-            vals.map((v, i) => {
-              const w = Math.max(1, Math.min(28, band - Math.max(2, band * 0.28)));
-              return v > 0 ? (
-                <path
-                  key={points[i]![0]}
-                  className={i === active ? "chart__bar is-active" : "chart__bar"}
-                  d={barPath(x(i) - w / 2, y(v), w, pad.top + plotH - y(v))}
-                />
-              ) : null;
-            })
-          ) : (
-            <>
-              <path
-                className="chart__area"
-                d={`${line}L${x(vals.length - 1)},${pad.top + plotH}L${x(0)},${pad.top + plotH}Z`}
-              />
-              <path className="chart__line" d={line} />
-              {active !== null && activeValue !== undefined ? (
-                <circle className="chart__dot" cx={x(active)} cy={y(activeValue)} r={4.5} />
-              ) : null}
-            </>
-          )}
-          {active !== null && kind === "line" ? (
-            <line
-              className="chart__cursor"
-              x1={x(active)}
-              x2={x(active)}
-              y1={pad.top}
-              y2={pad.top + plotH}
-            />
-          ) : null}
-          {points.map(([time], i) =>
-            i % labelEvery === 0 ? (
-              <text key={time} className="chart__axis" x={x(i)} y={height - 6} textAnchor="middle">
-                {f.day(time)}
-              </text>
-            ) : null,
-          )}
-        </svg>
-        {/* The plot is a range input over the days: arrow keys, Home/End or the pointer pick the
-            day the readout shows, and screen readers announce it. */}
-        {vals.length > 0 ? (
-          <input
-            type="range"
-            className="chart__scrub"
-            min={0}
-            max={vals.length - 1}
-            step={1}
-            value={Math.max(0, shown)}
-            aria-label={t.activity.chartSummary(title, describe(total), vals.length)}
-            aria-valuetext={
-              shownPoint ? `${f.day(shownPoint[0])}: ${describe(shownPoint[1])}` : undefined
-            }
-            onChange={(e) => setActive(Number(e.target.value))}
-            onPointerMove={onPointer}
-            onPointerLeave={() => setActive(null)}
-            onBlur={() => setActive(null)}
-          />
-        ) : null}
-      </div>
-      <details className="chart__table">
-        <summary>{t.activity.showTable}</summary>
-        <div className="table-scroll">
-          <table>
-            <caption className="visually-hidden">{title}</caption>
-            <thead>
-              <tr>
-                <th scope="col">{t.activity.day}</th>
-                <th scope="col">{t.activity.value}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {points.map(([time, v]) => (
-                <tr key={time}>
-                  <th scope="row">{f.day(time)}</th>
-                  <td>{f.number(Math.round(v * 10) / 10)}</td>
-                </tr>
+        {empty ? (
+          <p className="chart__empty">{t.activity.chartEmpty}</p>
+        ) : (
+          <>
+            <svg
+              width={width}
+              height={height}
+              viewBox={`0 0 ${width} ${height}`}
+              aria-hidden="true"
+              focusable="false"
+            >
+              {ticks.map((tick) => (
+                <g key={tick} className="chart__grid">
+                  <line x1={pad.left} x2={width - pad.right} y1={y(tick)} y2={y(tick)} />
+                  <text x={pad.left - 8} y={y(tick)} dy="0.32em" textAnchor="end">
+                    {f.compact(tick)}
+                  </text>
+                </g>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </details>
+              {kind === "bars" ? (
+                vals.map((v, i) => {
+                  const w = Math.max(1, Math.min(28, band - Math.max(2, band * 0.28)));
+                  return v > 0 ? (
+                    <path
+                      key={points[i]![0]}
+                      className={i === active ? "chart__bar is-active" : "chart__bar"}
+                      d={barPath(x(i) - w / 2, y(v), w, pad.top + plotH - y(v))}
+                    />
+                  ) : null;
+                })
+              ) : (
+                <>
+                  <path
+                    className="chart__area"
+                    d={`${line}L${x(vals.length - 1)},${pad.top + plotH}L${x(0)},${pad.top + plotH}Z`}
+                  />
+                  <path className="chart__line" d={line} />
+                  {active !== null && activeValue !== undefined ? (
+                    <circle className="chart__dot" cx={x(active)} cy={y(activeValue)} r={4.5} />
+                  ) : null}
+                </>
+              )}
+              {active !== null && kind === "line" ? (
+                <line
+                  className="chart__cursor"
+                  x1={x(active)}
+                  x2={x(active)}
+                  y1={pad.top}
+                  y2={pad.top + plotH}
+                />
+              ) : null}
+              {points.map(([time], i) =>
+                i % labelEvery === 0 ? (
+                  <text
+                    key={time}
+                    className="chart__axis"
+                    x={x(i)}
+                    y={height - 6}
+                    textAnchor="middle"
+                  >
+                    {f.day(time)}
+                  </text>
+                ) : null,
+              )}
+            </svg>
+            {/* The plot is a range input over the days: arrow keys, Home/End or the pointer pick the
+            day the readout shows, and screen readers announce it. */}
+            {vals.length > 0 ? (
+              <input
+                type="range"
+                className="chart__scrub"
+                min={0}
+                max={vals.length - 1}
+                step={1}
+                value={Math.max(0, shown)}
+                aria-label={t.activity.chartSummary(title, describe(total), vals.length)}
+                aria-valuetext={
+                  shownPoint ? `${f.day(shownPoint[0])}: ${describe(shownPoint[1])}` : undefined
+                }
+                onChange={(e) => setActive(Number(e.target.value))}
+                onPointerMove={onPointer}
+                onPointerLeave={() => setActive(null)}
+                onBlur={() => setActive(null)}
+              />
+            ) : null}
+          </>
+        )}
+      </div>
+      {empty ? null : (
+        <details className="chart__table">
+          <summary>{t.activity.showTable}</summary>
+          <div className="table-scroll">
+            <table>
+              <caption className="visually-hidden">{title}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">{t.activity.day}</th>
+                  <th scope="col">{t.activity.value}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {points.map(([time, v]) => (
+                  <tr key={time}>
+                    <th scope="row">{f.day(time)}</th>
+                    <td>{f.number(Math.round(v * 10) / 10)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      )}
     </figure>
   );
 }
