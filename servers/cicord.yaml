@@ -268,16 +268,22 @@ spec:
           allow: [ViewChannel]
 
     # ── Voice (the wizard's voice channel, kept: same Discord channel)
+    # Joining the hub creates a voice room of one's own (plugin "voice-rooms", bots/cicord).
+    create-room:
+      name: ➕ Create a channel
+      type: voice
+      category: voice
+      position: 0
     lounge:
       name: Lounge
       type: voice
       category: voice
-      position: 0
+      position: 1
     pair-programming:
       name: Pair programming
       type: voice
       category: voice
-      position: 1
+      position: 2
 
     # ── Staff
     staff:

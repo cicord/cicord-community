@@ -189,14 +189,14 @@ importers:
   .:
     dependencies:
       '@cicord/client':
-        specifier: 0.1.9
-        version: 0.1.9
+        specifier: 0.1.10
+        version: 0.1.10
       '@cicord/react':
-        specifier: 0.1.9
-        version: 0.1.9(react@19.3.1)
+        specifier: 0.1.10
+        version: 0.1.10(react@19.3.1)
       '@cicord/ui':
-        specifier: 0.1.9
-        version: 0.1.9(react@19.3.1)
+        specifier: 0.1.10
+        version: 0.1.10(react@19.3.1)
       '@fontsource-variable/atkinson-hyperlegible-next':
         specifier: ^5.3.0
         version: 5.3.0
@@ -264,16 +264,16 @@ packages:
   '@blazediff/core@1.10.0':
     resolution: {integrity: sha512-AOQff0zgR7cGsZL+4E7hVkmujoPUpm0J9xzWGWZj5wCjd3gmxESXAPfKyuzs93VdpQNFhHlBhfOjrcZ+XTERtQ==}
 
-  '@cicord/client@0.1.9':
-    resolution: {integrity: sha512-TcBsKFnG5BOuR26+8H8zeCUKSOHjL/j/jgF7kBEt3ks9R0n4EAkb7qA6Q2ZOEpFBk3mCe/F8NSvCmVhZPnva9g==}
+  '@cicord/client@0.1.10':
+    resolution: {integrity: sha512-/DGl7IiX8/CUDOak7Brvnkc82NwQZm7bKtFOSs/yOj+V/ZkQge0+x7OCsI7DLBkK9Y4H1i6eKEihlw1G+9cyKA==}
 
-  '@cicord/react@0.1.9':
-    resolution: {integrity: sha512-do+78qVKRGAMCRRFK6xgnT8PoPIT3WGFB8HcIg+bnuXXrqtJ79bsNKxeImJlJZkp8MxGQ7ESAHdqWhIghu6aLw==}
+  '@cicord/react@0.1.10':
+    resolution: {integrity: sha512-FB9wk3xgCSNaNhNcK90i3pp7o+4ParwstyipEJGW8LT534ru0RmNM+9jTS3ujDCEs4mcCWdkDVVlh0hr/fbKnQ==}
     peerDependencies:
       react: '>=18.3.0'
 
-  '@cicord/ui@0.1.9':
-    resolution: {integrity: sha512-V/ub9TaZQYYtnYwthqne/yLG8oflJMfKO78zNXmuZzAfeH7wX8HIDmxvdekpveyVbkVUHrfuwQPgzZxgi7qn3Q==}
+  '@cicord/ui@0.1.10':
+    resolution: {integrity: sha512-ksRr7f9f99pUeUH2Yvz7B8wDAlLW1xdIELEMPe9DLpHbMP1BWsfco92EUmaS5m1Y3pMrN75GE8HPcUZVbiLaYQ==}
     peerDependencies:
       react: '>=18.3.0'
 
@@ -1808,14 +1808,14 @@ snapshots:
 
   '@blazediff/core@1.10.0': {}
 
-  '@cicord/client@0.1.9': {}
+  '@cicord/client@0.1.10': {}
 
-  '@cicord/react@0.1.9(react@19.3.1)':
+  '@cicord/react@0.1.10(react@19.3.1)':
     dependencies:
-      '@cicord/client': 0.1.9
+      '@cicord/client': 0.1.10
       react: 19.3.1
 
-  '@cicord/ui@0.1.9(react@19.3.1)':
+  '@cicord/ui@0.1.10(react@19.3.1)':
     dependencies:
       react: 19.3.1
 
