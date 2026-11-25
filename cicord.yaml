@@ -4,7 +4,7 @@ kind: Project
 metadata:
   name: cicord
 spec:
-  engine: ">=0.1.8 <0.2.0"   # emergency pause, health gates, Store keeps portal route types current
+  engine: ">=0.1.10 <0.2.0"  # voice-rooms (voice SDK), emergency pause, health gates
   source:
     provider: github
     repo: https://github.com/cicord/cicord-community

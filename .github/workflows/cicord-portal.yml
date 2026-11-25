@@ -27,10 +27,10 @@ jobs:
       # tarballs of the portal kit that the release binary embeds (a "go install" build does
       # not). Its checksum and its build provenance (the release workflow of cicord/cicord,
       # from that tag) are verified.
-      - name: Install cicord (v0.1.9, release binary)
+      - name: Install cicord (v0.1.10, release binary)
         working-directory: ${{ runner.temp }}
         env:
-          CICORD_TAG: "v0.1.9"
+          CICORD_TAG: "v0.1.10"
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
