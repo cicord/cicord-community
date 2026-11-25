@@ -4,7 +4,7 @@ kind: Project
 metadata:
   name: cicord
 spec:
-  engine: ">=0.1.5 <0.2.0"   # roles.<key>.members, spec.analytics.portal
+  engine: ">=0.1.8 <0.2.0"   # emergency pause, health gates, Store keeps portal route types current
   source:
     provider: github
     repo: https://github.com/cicord/cicord-community
@@ -12,8 +12,10 @@ spec:
   runtime:
     url: https://community.cicord.dev
   writeBack:
-    # Plugin settings and installs are committed directly; structural changes
-    # (roles, channels, permissions) open a pull request for review.
+    # Plugin settings (bots/**, plugins/**) are committed directly. A Store install or
+    # update that also changes cicord.lock or the portal's route types, and server images
+    # (servers/**), open a pull request. The admin never edits roles or channels: they
+    # change through pull requests on servers/*.yaml.
     defaultMode: pullRequest
     policies:
       - paths: ["bots/**", "plugins/**"]

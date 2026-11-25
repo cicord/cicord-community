@@ -21,15 +21,34 @@ jobs:
         working-directory: portal
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
-        with:
-          go-version: stable
-      # The Cicord release the repository requires (cicord.yaml spec.engine ">=0.1.5"): its
-      # typegen and validation, and the first to serve the portal analytics endpoint.
-      - run: go install github.com/cicord/cicord/cmd/cicord@v0.1.5
+      # The cicord release that generated this portal (its vendored @cicord/* packages); bump
+      # it with the runtime. The release binary embeds the portal kit that "portal vendor
+      # --check" compares with (a "go install" build does not). Its checksum and its build
+      # provenance (the release workflow of cicord/cicord, from that tag) are verified.
+      - name: Install cicord (v0.1.8, release binary)
+        working-directory: ${{ runner.temp }}
+        env:
+          CICORD_TAG: "v0.1.8"
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="$CICORD_TAG"
+          if [ "$tag" = latest ]; then tag="$(gh release view --repo cicord/cicord --json tagName -q .tagName)"; fi
+          case "$RUNNER_ARCH" in X64) arch=amd64 ;; ARM64) arch=arm64 ;; *) echo "::error::no cicord release for $RUNNER_ARCH"; exit 1 ;; esac
+          archive="cicord_${tag#v}_linux_${arch}.tar.gz"
+          gh release download "$tag" --repo cicord/cicord --pattern "$archive" --pattern checksums.txt --clobber
+          awk -v f="$archive" '$2 == f' checksums.txt | sha256sum -c -
+          gh attestation verify "$archive" --repo cicord/cicord \
+            --signer-workflow cicord/cicord/.github/workflows/release.yml --source-ref "refs/tags/$tag"
+          mkdir -p cicord-bin && tar -xzf "$archive" -C cicord-bin cicord
+          echo "$PWD/cicord-bin" >> "$GITHUB_PATH"
+          cicord-bin/cicord version
       - name: The plugin route types match the plugins (src/cicord-routes.d.ts)
         working-directory: .
         run: cicord portal typegen --check --out portal/src/cicord-routes.d.ts
+      - name: The vendored @cicord/* packages are this cicord's (vendor/)
+        working-directory: .
+        run: cicord portal vendor --check portal
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
           version: 12
