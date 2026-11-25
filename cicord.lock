@@ -86,11 +86,11 @@ plugins:
             - storage.kv
             - portal.routes
     cicord/welcome:
-        version: 0.1.0
+        version: 0.1.1
         repo: https://github.com/cicord/cicord-plugins
         path: plugins/welcome
-        commit: 5287d31b787c56f4aff6d7c6dd1e782935c29c1a
-        integrity: sha256-tLhHLsg0zfcMXDcM25woNCl3Y5TVTeAjE1ftRVFg2DY=
+        commit: bc3f6471beed6176282c838723e8812e4a78b107
+        integrity: sha256-vxsCXrf5x3iSHOmR4uhT+F/j7VqdSA3qrvx6yS2aa+4=
         capabilities:
             - discord.messages.send
             - discord.channels.read
