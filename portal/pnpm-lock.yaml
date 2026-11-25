@@ -268,7 +268,7 @@ packages:
     resolution: {integrity: sha512-AOQff0zgR7cGsZL+4E7hVkmujoPUpm0J9xzWGWZj5wCjd3gmxESXAPfKyuzs93VdpQNFhHlBhfOjrcZ+XTERtQ==}
 
   '@cicord/client@file:vendor/cicord-client-0.1.4.tgz':
-    resolution: {integrity: sha512-q1on6gHnBs3FWmA5/7Dn8ahHcXceEzNph5psc+H83lW9jQyPnxCRgvtd/JMfO8RyMwn7TiCibq6BkohSTuOdLA==, tarball: file:vendor/cicord-client-0.1.4.tgz}
+    resolution: {integrity: sha512-iGLJCewukHX6tCvECUMzMdd8xS/y8tJ2iAOVCIHzej6EeyPEhx4hF2Nk15eKZ7qvVERvHhkQUbKgwVIvWPQsnA==, tarball: file:vendor/cicord-client-0.1.4.tgz}
     version: 0.1.4
 
   '@cicord/react@file:vendor/cicord-react-0.1.4.tgz':

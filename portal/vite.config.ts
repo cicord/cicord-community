@@ -7,15 +7,17 @@ import { defineConfig } from "vite-plus";
 // so the portal is same-origin with the runtime and uses its session cookie.
 const runtime = process.env["CICORD_RUNTIME_URL"] ?? "http://127.0.0.1:7420";
 const runtimeOrigin = new URL(runtime).origin;
+
+// The dev server's port: strict, so that it never moves to another port, which would no
+// longer match the origins below and make every unsafe request fail without a clear cause.
 const port = 5174;
-// The dev server's own origins: only requests made by this page are presented as same-origin.
 const devOrigins = new Set([`http://localhost:${port}`, `http://127.0.0.1:${port}`]);
 
 // The runtime only answers loopback Host headers in dev and rejects unsafe requests whose
 // Origin is not its own (CSRF protection). The dev server is a trusted same-machine proxy:
-// keep Host as is (localhost:5174 is loopback) and present the page's own requests as
-// same-origin. Any other Origin (another site open in the browser) is passed through
-// unchanged, so the runtime's CSRF check still rejects it.
+// keep Host as is (localhost is loopback) and present the dev page's own requests as
+// same-origin. Any other Origin (another site in the browser) is passed through unchanged,
+// so the runtime still rejects it.
 const proxyTo = {
   target: runtime,
   changeOrigin: false,

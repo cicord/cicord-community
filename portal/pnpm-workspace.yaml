@@ -1,13 +1,11 @@
-# pnpm reads overrides from here (package.json "pnpm.overrides" is ignored by recent pnpm):
-# @cicord/react depends on @cicord/client by version, so every @cicord/* package must resolve
-# to the vendored tarball, never to the npm registry.
+# pnpm settings of the portal (pnpm reads overrides here, not in package.json).
 overrides:
-  "@cicord/client": file:vendor/cicord-client-0.1.4.tgz
-  "@cicord/react": file:vendor/cicord-react-0.1.4.tgz
-  "@cicord/ui": file:vendor/cicord-ui-0.1.4.tgz
-  vite: npm:@voidzero-dev/vite-plus-core@8.3.8000
+    '@cicord/client': file:vendor/cicord-client-0.1.4.tgz
+    '@cicord/react': file:vendor/cicord-react-0.1.4.tgz
+    '@cicord/ui': file:vendor/cicord-ui-0.1.4.tgz
+    vite: npm:@voidzero-dev/vite-plus-core@8.3.8000
 peerDependencyRules:
-  allowAny:
-    - vite
-  allowedVersions:
-    vite: "*"
+    allowAny:
+        - vite
+    allowedVersions:
+        vite: '*'
