@@ -67,7 +67,8 @@ Maintainers can preview a pull request against the live server with
 
 [community.cicord.dev](https://community.cicord.dev) serves [`portal/`](portal), a fork of
 the reference portal (`cicord portal init`) built on the Cicord portal SDK (`@cicord/client`,
-`@cicord/react`, `@cicord/ui`, vendored in `portal/vendor/` from the `cicord` binary). Its
+`@cicord/react`, `@cicord/ui`, from npm at the version of `cicord`: `cicord portal upgrade`
+bumps them). Its
 theme, texts and links stay in `servers/cicord.yaml` (`spec.portal`); `cicord.yaml`
 `spec.portal.path` points the runtime at the committed build, `portal/dist/`.
 

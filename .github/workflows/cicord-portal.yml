@@ -21,14 +21,16 @@ jobs:
         working-directory: portal
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      # The cicord release that generated this portal (its vendored @cicord/* packages); bump
-      # it with the runtime. The release binary embeds the portal kit that "portal vendor
-      # --check" compares with (a "go install" build does not). Its checksum and its build
-      # provenance (the release workflow of cicord/cicord, from that tag) are verified.
-      - name: Install cicord (v0.1.8, release binary)
+      # The cicord release whose @cicord/* packages the portal depends on: bump it with the
+      # runtime, after "cicord portal upgrade". "portal upgrade --check" compares the portal
+      # with this binary: the exact npm version in package.json, or for a vendored portal the
+      # tarballs of the portal kit that the release binary embeds (a "go install" build does
+      # not). Its checksum and its build provenance (the release workflow of cicord/cicord,
+      # from that tag) are verified.
+      - name: Install cicord (v0.1.9, release binary)
         working-directory: ${{ runner.temp }}
         env:
-          CICORD_TAG: "v0.1.8"
+          CICORD_TAG: "v0.1.9"
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
@@ -46,9 +48,9 @@ jobs:
       - name: The plugin route types match the plugins (src/cicord-routes.d.ts)
         working-directory: .
         run: cicord portal typegen --check --out portal/src/cicord-routes.d.ts
-      - name: The vendored @cicord/* packages are this cicord's (vendor/)
+      - name: The @cicord/* packages are this cicord's version (package.json, vendor/)
         working-directory: .
-        run: cicord portal vendor --check portal
+        run: cicord portal upgrade --check portal
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
           version: 12
