@@ -68,12 +68,12 @@ export function portalServer(mode: "light" | "dark" | "system"): PortalServer {
 }
 
 export const roles: Record<string, { id: string; name: string; color: string }> = {
-  maintainer: { id: "r1", name: "Maintainer", color: "#5865f2" },
-  moderator: { id: "r2", name: "Moderator", color: "#eb459e" },
-  contributor: { id: "r3", name: "Contributor", color: "#f0b232" },
-  "plugin-author": { id: "r4", name: "Plugin author", color: "#23a55a" },
-  "changelog-ping": { id: "r5", name: "Changelog ping", color: "#000000" },
-  member: { id: "r6", name: "Member", color: "#000000" },
+  maintainer: { id: "110001", name: "Maintainer", color: "#5865f2" },
+  moderator: { id: "110002", name: "Moderator", color: "#eb459e" },
+  contributor: { id: "110003", name: "Contributor", color: "#f0b232" },
+  "plugin-author": { id: "110004", name: "Plugin author", color: "#23a55a" },
+  "changelog-ping": { id: "110005", name: "Changelog ping", color: "#000000" },
+  member: { id: "110006", name: "Member", color: "#000000" },
 };
 
 /** The mock viewer for each access role (`?role=` in `pnpm dev`). */

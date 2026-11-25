@@ -67,7 +67,7 @@ export function seedTickets(now: number = Date.now()): TicketStore {
     msg(
       bot,
       hoursAgo,
-      `Hi ${who.displayName}, thanks for reaching out! The team will be with you shortly.`,
+      `Hi <@${who.id}>, thanks for reaching out! <@&110001> <@&110002> will be with you shortly.`,
       true,
     );
   const base = (
@@ -398,7 +398,7 @@ export function ticketsRoute(
         {
           id: `m-${n}`,
           author: bot,
-          content: `Hi ${viewer.person.displayName}, thanks for reaching out! The team will be with you shortly.`,
+          content: `Hi <@${viewer.person.id}>, thanks for reaching out! <@&110001> <@&110002> will be with you shortly.`,
           createdAt: at,
         },
       ],
@@ -520,7 +520,9 @@ export function ticketsRoute(
       {
         id,
         author: bot,
-        content: `${content}\n— ${viewer.person.displayName} (via portal)`,
+        // Posted as an embed (the text and "— name (via portal)" in it), as tickets 0.2 does:
+        // the message has no text content.
+        content: "",
         createdAt: at,
       },
     ];

@@ -29,8 +29,7 @@ export function PriorityBadge({ priority }: { priority: Priority }) {
 }
 
 /** The name of a label key (events and pickers carry keys); unknown keys are shown as is. */
-function labelName(t: Messages, key: string): string {
-  if (key === "none") return t.tickets.noLabel;
+function labelName(key: string): string {
   return TICKET_LABELS.find((l) => l.key === key)?.name ?? key;
 }
 
@@ -81,7 +80,8 @@ function eventDetail(t: Messages, event: MyTicketEvent): string | undefined {
   if (!event.detail) return undefined;
   if (event.type === "priority" && event.detail in t.tickets.priorities)
     return t.tickets.priorities[event.detail as Priority];
-  if (event.type === "label") return labelName(t, event.detail);
+  // "none": the label was removed.
+  if (event.type === "label") return event.detail === "none" ? undefined : labelName(event.detail);
   return event.detail;
 }
 

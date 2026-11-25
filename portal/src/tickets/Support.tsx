@@ -4,7 +4,7 @@
  * assignment, priority, label, close and reopen.
  */
 import { isCicordApiError, isSafeUrl } from "@cicord/client";
-import { Avatar, Button, LinkButton, Notice } from "@cicord/ui";
+import { Avatar, Button, LinkButton, Notice, renderInline } from "@cicord/ui";
 import { useId, useMemo, useState, type FormEvent } from "react";
 import { useFormat } from "../format.ts";
 import { useT } from "../i18n/index.tsx";
@@ -423,8 +423,29 @@ function StaffTicketView({ id, viewer }: { id: string; viewer: Member }) {
   );
 }
 
+/**
+ * Discord mention markup as text (the bold, italic, code and links of Discord's Markdown are
+ * rendered by `renderInline`, as React elements): `<@id>` becomes "@name" when the person is known (the
+ * author, the assignee, a participant), `<@&id>` "@role" and `<#id>` "#channel".
+ */
+export function readableMentions(content: string, names: ReadonlyMap<string, string>): string {
+  return content
+    .replace(/<@!?(\d+)>/g, (_, id: string) => `@${names.get(id) ?? "user"}`)
+    .replace(/<@&\d+>/g, "@role")
+    .replace(/<#\d+>/g, "#channel");
+}
+
 function Conversation({ ticket }: { ticket: StaffTicketDetail }) {
   const t = useT();
+  const names = useMemo(
+    () =>
+      new Map(
+        [ticket.author, ticket.assignee, ...(ticket.messages ?? []).map((m) => m.author)]
+          .filter((p) => p !== null)
+          .map((p) => [p.id, p.displayName]),
+      ),
+    [ticket],
+  );
   const f = useFormat();
   const id = useId();
   const [content, setContent] = useState("");
@@ -469,7 +490,13 @@ function Conversation({ ticket }: { ticket: StaffTicketDetail }) {
                     {f.relative(m.createdAt)}
                   </time>
                 </p>
-                <p className="message__content">{m.content}</p>
+                {m.content ? (
+                  <p className="message__content">
+                    {renderInline(readableMentions(m.content, names), m.id)}
+                  </p>
+                ) : (
+                  <p className="message__content message__content--none">{t.support.noText}</p>
+                )}
               </div>
             </li>
           ))}

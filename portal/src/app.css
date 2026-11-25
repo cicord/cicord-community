@@ -1581,6 +1581,9 @@ code {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+.message__content--none {
+  font-style: italic;
+}
 .message--bot .message__content {
   color: var(--cicord-muted);
 }

@@ -34,7 +34,7 @@ import {
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
 // ───────────────────────────────────────────────────────────── contract
-// Mirrors plugins/tickets/src/routes.ts of tickets 0.2.0 (cicord/cicord-plugins), the
+// Mirrors plugins/tickets/src/routes.ts of tickets 0.2.0 (cicord/cicord-plugins, 05cdd81), the
 // plugin's route contract, with its `Routes` interface named `TicketsRoutes` here.
 //
 // Errors are `{error: {code, message}}` bodies: 400 `invalid`, 403 `forbidden` (not on the
@@ -184,7 +184,10 @@ export interface TicketsRoutes {
     response: { items: StaffTicket[] };
   };
   "GET /tickets/:id": { response: StaffTicketDetail };
-  /** Staff members who can be assigned (those the plugin has seen act as staff). */
+  /**
+   * Who can be assigned, by display name: the holders of the staff roles (bots excluded),
+   * the server owner and the viewer.
+   */
   "GET /staff": { response: { items: Person[] } };
   /** `userId`: a staff member's id, `me`, or null to unassign. */
   "POST /tickets/:id/assign": { body: { userId: string | null }; response: StaffTicket };

@@ -2,7 +2,7 @@ import type { FetchLike } from "@cicord/client";
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, test } from "vite-plus/test";
-import { sortQueue } from "../src/tickets/Support.tsx";
+import { readableMentions, sortQueue } from "../src/tickets/Support.tsx";
 import type { StaffTicket } from "../src/tickets/api.ts";
 import { apiError, renderPortal } from "./render.tsx";
 
@@ -190,10 +190,13 @@ describe("staff", () => {
     const reply = await screen.findByRole("textbox", { name: "Reply" });
     await user.type(reply, "The account is banned, thanks!");
     await user.click(screen.getByRole("button", { name: "Send reply" }));
-    expect(
-      await screen.findByText(/The account is banned, thanks!\s+— Sam \(via portal\)/),
-    ).toBeTruthy();
+    // tickets 0.2 posts the reply as an embed: the channel message has no text content.
+    expect(await screen.findByText("Sam replied from the portal")).toBeTruthy();
+    expect(screen.getByText(/^No text: an embed/)).toBeTruthy();
     expect((reply as HTMLTextAreaElement).value).toBe("");
+    expect(calls.find((c) => c.path.endsWith("/messages"))?.body).toEqual({
+      content: "The account is banned, thanks!",
+    });
 
     await user.click(screen.getByRole("button", { name: "Close the ticket" }));
     await user.type(screen.getByRole("textbox", { name: "Reason" }), "Spammer banned.");
@@ -234,4 +237,23 @@ describe("staff", () => {
     renderPortal("/support", { role: "moderator", wrap: forbidden });
     expect(await screen.findByText("You are not on the support team")).toBeTruthy();
   });
+});
+
+test("mention markup reads as names", () => {
+  const names = new Map([["2003", "Kai"]]);
+  expect(readableMentions("Hi <@2003>, <@&110001> and <@!999> in <#42>", names)).toBe(
+    "Hi @Kai, @role and @user in #channel",
+  );
+});
+
+test("the conversation shows mentions as names and the label removal in the history", async () => {
+  const user = userEvent.setup();
+  renderPortal("/support/45", { role: "admin" });
+  expect(
+    await screen.findByText(
+      "Hi @Noor, thanks for reaching out! @role @role will be with you shortly.",
+    ),
+  ).toBeTruthy();
+  await user.selectOptions(screen.getByRole("combobox", { name: "Label" }), "");
+  expect(await screen.findByText("Morgan removed the label")).toBeTruthy();
 });
