@@ -182,9 +182,9 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@cicord/client': file:vendor/cicord-client-0.1.4.tgz
-  '@cicord/react': file:vendor/cicord-react-0.1.4.tgz
-  '@cicord/ui': file:vendor/cicord-ui-0.1.4.tgz
+  '@cicord/client': file:vendor/cicord-client-0.1.5.tgz
+  '@cicord/react': file:vendor/cicord-react-0.1.5.tgz
+  '@cicord/ui': file:vendor/cicord-ui-0.1.5.tgz
   vite: npm:@voidzero-dev/vite-plus-core@8.3.8000
 
 importers:
@@ -192,14 +192,14 @@ importers:
   .:
     dependencies:
       '@cicord/client':
-        specifier: file:vendor/cicord-client-0.1.4.tgz
-        version: file:vendor/cicord-client-0.1.4.tgz
+        specifier: file:vendor/cicord-client-0.1.5.tgz
+        version: file:vendor/cicord-client-0.1.5.tgz
       '@cicord/react':
-        specifier: file:vendor/cicord-react-0.1.4.tgz
-        version: file:vendor/cicord-react-0.1.4.tgz(react@19.3.1)
+        specifier: file:vendor/cicord-react-0.1.5.tgz
+        version: file:vendor/cicord-react-0.1.5.tgz(react@19.3.1)
       '@cicord/ui':
-        specifier: file:vendor/cicord-ui-0.1.4.tgz
-        version: file:vendor/cicord-ui-0.1.4.tgz(react@19.3.1)
+        specifier: file:vendor/cicord-ui-0.1.5.tgz
+        version: file:vendor/cicord-ui-0.1.5.tgz(react@19.3.1)
       '@fontsource-variable/atkinson-hyperlegible-next':
         specifier: ^5.3.0
         version: 5.3.0
@@ -267,19 +267,19 @@ packages:
   '@blazediff/core@1.10.0':
     resolution: {integrity: sha512-AOQff0zgR7cGsZL+4E7hVkmujoPUpm0J9xzWGWZj5wCjd3gmxESXAPfKyuzs93VdpQNFhHlBhfOjrcZ+XTERtQ==}
 
-  '@cicord/client@file:vendor/cicord-client-0.1.4.tgz':
-    resolution: {integrity: sha512-iGLJCewukHX6tCvECUMzMdd8xS/y8tJ2iAOVCIHzej6EeyPEhx4hF2Nk15eKZ7qvVERvHhkQUbKgwVIvWPQsnA==, tarball: file:vendor/cicord-client-0.1.4.tgz}
-    version: 0.1.4
+  '@cicord/client@file:vendor/cicord-client-0.1.5.tgz':
+    resolution: {integrity: sha512-GXAmploJSLWh0hj1Ve+anUW8+NWpuCIXErvohkfGz6JOflvzam1TKlaxdlLIzvESXo+47UIfabsKbs0rSW6JoA==, tarball: file:vendor/cicord-client-0.1.5.tgz}
+    version: 0.1.5
 
-  '@cicord/react@file:vendor/cicord-react-0.1.4.tgz':
-    resolution: {integrity: sha512-0zTdzqueImtHptaoFCqi5uJ/EuGZwRorZzYigy0KX3gty9fOXmMhiww6qvrkHLU7zIl4Lsbap2lhztUXZ0JkGw==, tarball: file:vendor/cicord-react-0.1.4.tgz}
-    version: 0.1.4
+  '@cicord/react@file:vendor/cicord-react-0.1.5.tgz':
+    resolution: {integrity: sha512-h2u3iX+zFVLqjbWKuejAIWkIfC4roG7ajtl11ue/26gh+Kp4A3vdKloVIUtXiorTeqhKJMaNw7L1lHt5f0KmOw==, tarball: file:vendor/cicord-react-0.1.5.tgz}
+    version: 0.1.5
     peerDependencies:
       react: '>=18.3.0'
 
-  '@cicord/ui@file:vendor/cicord-ui-0.1.4.tgz':
-    resolution: {integrity: sha512-DIp3xbCAz+Vifm+mvcpEE4+H84E8v98soVEpNLiRrbzjhW/rOVoHAJg41EHLKsWf0KJq3Wq/YewmGYH6dKIfJg==, tarball: file:vendor/cicord-ui-0.1.4.tgz}
-    version: 0.1.4
+  '@cicord/ui@file:vendor/cicord-ui-0.1.5.tgz':
+    resolution: {integrity: sha512-vDcoeRbJU8vtwFfycEFmt1Ur2pieK94qDj3SJP4eQaJ9RuF/aqq3zuYz5Gb7ls5MPEslk75lV3oVyDzZmH0JSw==, tarball: file:vendor/cicord-ui-0.1.5.tgz}
+    version: 0.1.5
     peerDependencies:
       react: '>=18.3.0'
 
@@ -1814,14 +1814,14 @@ snapshots:
 
   '@blazediff/core@1.10.0': {}
 
-  '@cicord/client@file:vendor/cicord-client-0.1.4.tgz': {}
+  '@cicord/client@file:vendor/cicord-client-0.1.5.tgz': {}
 
-  '@cicord/react@file:vendor/cicord-react-0.1.4.tgz(react@19.3.1)':
+  '@cicord/react@file:vendor/cicord-react-0.1.5.tgz(react@19.3.1)':
     dependencies:
-      '@cicord/client': file:vendor/cicord-client-0.1.4.tgz
+      '@cicord/client': file:vendor/cicord-client-0.1.5.tgz
       react: 19.3.1
 
-  '@cicord/ui@file:vendor/cicord-ui-0.1.4.tgz(react@19.3.1)':
+  '@cicord/ui@file:vendor/cicord-ui-0.1.5.tgz(react@19.3.1)':
     dependencies:
       react: 19.3.1
 

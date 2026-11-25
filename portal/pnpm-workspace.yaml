@@ -1,8 +1,8 @@
 # pnpm settings of the portal (pnpm reads overrides here, not in package.json).
 overrides:
-    '@cicord/client': file:vendor/cicord-client-0.1.4.tgz
-    '@cicord/react': file:vendor/cicord-react-0.1.4.tgz
-    '@cicord/ui': file:vendor/cicord-ui-0.1.4.tgz
+    '@cicord/client': file:vendor/cicord-client-0.1.5.tgz
+    '@cicord/react': file:vendor/cicord-react-0.1.5.tgz
+    '@cicord/ui': file:vendor/cicord-ui-0.1.5.tgz
     vite: npm:@voidzero-dev/vite-plus-core@8.3.8000
 peerDependencyRules:
     allowAny:
