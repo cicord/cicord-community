@@ -1,0 +1,4 @@
+node_modules/
+*.local
+# dist/ is NOT ignored: the Cicord runtime serves the committed build (cicord.yaml
+# spec.portal.path); CI checks that it matches the sources (https://cicord.dev/docs/portal/custom-portal/).
