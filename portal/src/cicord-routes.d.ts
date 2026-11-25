@@ -5,7 +5,7 @@
 //
 //   moderation 0.1.1 (cicord/moderation): 2 route(s), untyped (no spec.routes.types)
 //   polls 0.1.1 (cicord/polls): 1 route(s), typed
-//   tickets 0.2.0 (cicord/tickets): 11 route(s), typed
+//   tickets 0.2.1 (cicord/tickets): 11 route(s), typed
 
 import type { RouteEntry } from "@cicord/client";
 
