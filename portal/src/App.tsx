@@ -1,39 +1,51 @@
 import { CicordProvider } from "@cicord/react";
 import { useState } from "react";
+import { Activity } from "./activity/Activity.tsx";
 import type { PortalConfig } from "./config.ts";
 import { Developers } from "./pages/Developers.tsx";
 import { Home } from "./pages/Home.tsx";
-import { Leaderboard } from "./pages/Leaderboard.tsx";
 import { NotFound } from "./pages/NotFound.tsx";
-import { Onboarding } from "./pages/Onboarding.tsx";
 import { Profile } from "./pages/Profile.tsx";
-import { Tickets } from "./pages/Tickets.tsx";
 import { ConfigProvider, ServerGate, Shell, usePages } from "./portal.tsx";
 import { usePathname } from "./router.tsx";
+import { MyTicketView, MyTickets, NewTicket } from "./tickets/MyTickets.tsx";
+import { SupportQueue, SupportTicket } from "./tickets/Support.tsx";
+
+/** `/tickets/12` → "12" (decoded; the API module encodes it again). */
+function idAfter(path: string, prefix: string): string | undefined {
+  if (!path.startsWith(prefix)) return undefined;
+  const rest = path.slice(prefix.length);
+  if (!rest || rest.includes("/")) return undefined;
+  try {
+    return decodeURIComponent(rest);
+  } catch {
+    return undefined;
+  }
+}
 
 /**
- * Routes. Add pages here (and links in the header / home). Pages turned off with
- * `spec.portal.pages`, or whose plugin is not installed, answer "not found".
+ * Routes. Pages turned off with `spec.portal.pages`, or whose plugin does not serve their
+ * routes, answer "not found".
  */
 function Page() {
-  const path = usePathname().replace(/\/+$/, "") || "/";
+  const path = usePathname();
   const pages = usePages();
-  switch (path) {
-    case "/":
-      return <Home />;
-    case "/onboarding":
-      return pages.onboarding ? <Onboarding /> : <NotFound />;
-    case "/me":
-      return pages.profile ? <Profile /> : <NotFound />;
-    case "/leaderboard":
-      return pages.leaderboard ? <Leaderboard /> : <NotFound />;
-    case "/tickets":
-      return pages.tickets ? <Tickets /> : <NotFound />;
-    case "/developers":
-      return <Developers />;
-    default:
-      return <NotFound />;
+  if (path === "/") return <Home />;
+  if (path === "/activity") return <Activity />;
+  if (path === "/me") return pages.profile ? <Profile /> : <NotFound />;
+  if (path === "/developers") return <Developers />;
+  if (pages.myTickets) {
+    if (path === "/tickets") return <MyTickets />;
+    if (path === "/tickets/new") return <NewTicket />;
+    const id = idAfter(path, "/tickets/");
+    if (id) return <MyTicketView key={id} id={id} />;
   }
+  if (pages.support) {
+    if (path === "/support") return <SupportQueue />;
+    const id = idAfter(path, "/support/");
+    if (id) return <SupportTicket key={id} id={id} />;
+  }
+  return <NotFound />;
 }
 
 export function App({ config }: { config: PortalConfig }) {

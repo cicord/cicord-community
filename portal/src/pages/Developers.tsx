@@ -3,12 +3,13 @@ import { useCicord, useLogout, useMe, useMember, useSession } from "@cicord/reac
 import { Button, Card, RoleChip } from "@cicord/ui";
 import { useState } from "react";
 import { useT } from "../i18n/index.tsx";
-import { SignIn, useServer } from "../portal.tsx";
+import { SignIn, useDocumentTitle, useServer } from "../portal.tsx";
 
 /**
  * A map of everything the SDK gives a portal: the session (cookie or bearer token), every
  * portal endpoint, and every plugin route of the server (GET routes can be called live).
- * Fork the portal and delete this page if you do not want it.
+ * Kept as a showcase for the developers of the Cicord community: this portal is a fork of
+ * the reference portal, and this page shows what it is built on.
  */
 export function Developers() {
   const t = useT();
@@ -19,6 +20,7 @@ export function Developers() {
   const session = useSession();
   const logout = useLogout();
   const key = server.key;
+  useDocumentTitle(t.developers.title);
 
   const endpoints: [string, string, string][] = [
     ["GET", "/api/v1/portal/servers", "client.portal.servers()"],
@@ -26,6 +28,11 @@ export function Developers() {
     ["GET", `/api/v1/portal/${key}/logo`, "server.theme.logo"],
     ["GET", `/api/v1/portal/${key}/banner`, "server.banner"],
     ["GET", `/api/v1/portal/${key}/me`, `client.portal.me("${key}") · useMember()`],
+    [
+      "GET",
+      `/api/v1/portal/${key}/analytics?period=30d`,
+      `client.portal.analytics("${key}", "30d") · usePortalAnalytics("30d")`,
+    ],
     ["GET", "/api/v1/me", "client.me() · useMe()"],
     ["GET", "/auth/login", "client.auth.login(redirect)"],
     ["POST", "/auth/link", "client.auth.exchangeLinkToken() · useLinkTokenLogin()"],
@@ -75,7 +82,7 @@ export function Developers() {
                     <dt>{t.me.roles}</dt>
                     <dd className="dev-roles">
                       {member.data.member.roles.length === 0 ? (
-                        <span className="dev-muted">{t.onboarding.noRoles}</span>
+                        <span className="dev-muted">{t.me.noRoles}</span>
                       ) : (
                         member.data.member.roles.map((r) => (
                           <RoleChip key={r.id} name={r.name} color={r.color} size="sm" />

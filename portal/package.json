@@ -1,13 +1,9 @@
 {
   "name": "cicord-community-portal",
-  "description": "The community portal of the Cicord Discord server (community.cicord.dev): activity and support tickets, built on the Cicord portal SDK.",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
+  "description": "The community portal of the Cicord Discord server (community.cicord.dev): activity and support tickets, built on the Cicord portal SDK.",
   "type": "module",
-  "engines": {
-    "node": ">=26"
-  },
-  "packageManager": "pnpm@12.23.0",
   "scripts": {
     "dev": "vp dev --mode mock",
     "dev:runtime": "vp dev",
@@ -48,5 +44,9 @@
     "@cicord/react": "file:vendor/cicord-react-0.1.4.tgz",
     "@cicord/ui": "file:vendor/cicord-ui-0.1.4.tgz",
     "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8000"
-  }
+  },
+  "engines": {
+    "node": ">=26"
+  },
+  "packageManager": "pnpm@12.23.0"
 }

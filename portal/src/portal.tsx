@@ -1,4 +1,10 @@
-import type { AccessRole, PortalPlugin, PortalServer, User } from "@cicord/client";
+import {
+  CicordApiError,
+  type AccessRole,
+  type PortalMe,
+  type PortalServer,
+  type User,
+} from "@cicord/client";
 import {
   useCicord,
   useCicordQuery,
@@ -7,11 +13,12 @@ import {
   useMember,
   usePortalServers,
 } from "@cicord/react";
-import { Avatar, Button, Spinner, ThemeProvider } from "@cicord/ui";
+import { Avatar, Button, Notice, Spinner, ThemeProvider } from "@cicord/ui";
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { forgetServer, requestedServer, rememberServer, type PortalConfig } from "./config.ts";
 import { I18nProvider, pickLocale, useT } from "./i18n/index.tsx";
 import { Link, navigate, usePathname } from "./router.tsx";
+import { MEMBER_ROUTE, STAFF_ROUTE, useTicketsPlugin } from "./tickets/api.ts";
 
 // ───────────────────────────────────────────────────────────── contexts
 
@@ -33,56 +40,69 @@ export function useServer(): PortalServer {
 }
 
 /** Starts a login that comes back to the current page. */
-export function useLogin(): () => void {
+function useLogin(): () => void {
   const config = usePortalConfig();
   return () => config.login(`${window.location.pathname}${window.location.search}`);
 }
 
-// ───────────────────────────────────────────────────────────── plugins & pages
+// ───────────────────────────────────────────────────────────── the viewer
+
+/** Moderators and admins of the server: the support team. */
+function isStaff(role: AccessRole | undefined): boolean {
+  return role === "moderator" || role === "admin";
+}
 
 /**
- * The instance of a plugin exposed on this server's portal, found by plugin name in
- * `PortalServer.plugins` (never hard-code bot / instance keys: they are the repository's).
+ * Who is looking at the portal, from `useMember()` (`GET /portal/{server}/me`): signed out
+ * (401, `data: null`), signed in but not a member of the server (403), or a member with
+ * their access role (`PortalMe.role`: member, moderator or admin, from `spec.access`).
  */
-export function usePlugin(plugin: string, route?: string): PortalPlugin | undefined {
-  return useServer().plugins.find(
-    (p) => p.plugin === plugin && (route === undefined || p.routes.includes(route)),
-  );
+export type Viewer =
+  | { status: "loading" }
+  | { status: "signedOut" }
+  | { status: "notMember" }
+  | { status: "error"; retry: () => void }
+  | { status: "member"; me: PortalMe; role: AccessRole; staff: boolean };
+
+export function useViewer(): Viewer {
+  const me = useMe();
+  const member = useMember();
+  const linkLogin = useLinkTokenLogin();
+  if (me.isLoading || linkLogin.status === "pending") return { status: "loading" };
+  if (!me.data) return { status: "signedOut" };
+  if (member.status === "error") {
+    if (member.error instanceof CicordApiError && member.error.code === "forbidden")
+      return { status: "notMember" };
+    return { status: "error", retry: () => void member.refetch() };
+  }
+  if (!member.data) return member.data === null ? { status: "signedOut" } : { status: "loading" };
+  const role = member.data.role;
+  return { status: "member", me: member.data, role, staff: isStaff(role) };
 }
 
-const rank: Record<string, number> = { member: 1, moderator: 2, admin: 3 };
-
-/** The viewer's role on the server (undefined when logged out or not a member). */
-function useViewerRole(): AccessRole | undefined {
-  return useMember().data?.role;
-}
-
-function atLeast(role: AccessRole | undefined, min: AccessRole): boolean {
-  return (rank[role ?? ""] ?? 0) >= (rank[min] ?? 0);
-}
+// ───────────────────────────────────────────────────────────── pages
 
 export interface Pages {
-  onboarding: boolean;
   profile: boolean;
-  leaderboard: boolean;
-  tickets: boolean;
-  /** Shown in the navigation (tickets: moderators only). */
-  ticketsInNav: boolean;
+  /** The member side of the tickets plugin (0.2 routes). */
+  myTickets: boolean;
+  /** The staff side of the tickets plugin (0.2 routes). */
+  support: boolean;
 }
 
-/** Pages enabled by `spec.portal.pages` and backed by a plugin when they need one. */
+/**
+ * Pages enabled by `spec.portal.pages` and backed by a plugin that serves their routes. The
+ * tickets pages are detected by route (`GET /tickets/mine`, `GET /staff`), so a server still
+ * running tickets 0.1 shows neither instead of misreading its payloads.
+ */
 export function usePages(): Pages {
   const server = useServer();
-  const role = useViewerRole();
-  const onboarding = usePlugin("onboarding");
-  const levels = usePlugin("levels", "GET /leaderboard");
-  const tickets = usePlugin("tickets", "GET /tickets");
+  const mine = useTicketsPlugin(MEMBER_ROUTE);
+  const staff = useTicketsPlugin(STAFF_ROUTE);
   return {
-    onboarding: server.pages.onboarding && !!onboarding,
     profile: server.pages.profile,
-    leaderboard: server.pages.leaderboard && !!levels,
-    tickets: server.pages.tickets && !!tickets,
-    ticketsInNav: server.pages.tickets && !!tickets && atLeast(role, "moderator"),
+    myTickets: server.pages.tickets && !!mine,
+    support: server.pages.tickets && !!staff,
   };
 }
 
@@ -134,7 +154,6 @@ export function ServerGate({
       ) : (
         <ServerContext.Provider value={server}>
           <ThemeProvider theme={server.theme} global>
-            <DocumentTitle />
             {children}
           </ThemeProvider>
         </ServerContext.Provider>
@@ -143,28 +162,24 @@ export function ServerGate({
   );
 }
 
-function DocumentTitle() {
+/** Sets the document title: "<page> · <portal title>". */
+export function useDocumentTitle(page?: string): void {
   const server = useServer();
   const t = useT();
   useEffect(() => {
-    document.title = server.title !== server.name ? server.title : t.portalOf(server.name);
-  }, [server, t]);
-  return null;
+    const site = server.title !== server.name ? server.title : t.portalOf(server.name);
+    document.title = page ? `${page} · ${site}` : site;
+  }, [server, t, page]);
 }
 
 function GateMessage({ kind, retry }: { kind: "down" | "loading" | "none"; retry?: () => void }) {
   const t = useT();
-  if (kind === "loading")
-    return (
-      <div className="portal-loading">
-        <Spinner size="lg" label={t.loading} />
-      </div>
-    );
+  if (kind === "loading") return <PageLoading fullscreen />;
   if (kind === "down")
     return (
       <CenteredMessage title={t.apiDown}>
         <Button variant="secondary" onClick={retry}>
-          {t.onboarding.retry}
+          {t.retry}
         </Button>
       </CenteredMessage>
     );
@@ -201,9 +216,11 @@ export function ServerMark({ size = 40, className }: { size?: number; className?
 }
 
 function NavLink({ to, children }: { to: string; children: ReactNode }) {
-  const path = usePathname().replace(/\/+$/, "") || "/";
+  const path = usePathname();
+  // A section stays current on its sub-pages (/tickets/12 is under My tickets).
+  const current = path === to ? "page" : path.startsWith(`${to}/`) ? "location" : undefined;
   return (
-    <Link to={to} className="portal-nav__link" aria-current={path === to ? "page" : undefined}>
+    <Link to={to} className="portal-nav__link" aria-current={current}>
       {children}
     </Link>
   );
@@ -251,17 +268,13 @@ export function Shell({ children }: { children: ReactNode }) {
   const server = useServer();
   const config = usePortalConfig();
   const t = useT();
-  const sim = useSimulator();
-  const role = useViewerRole();
-  // The Developers page stays reachable by URL; the link is shown to the server team and
-  // in development (mock, simulator) only.
-  const showDevelopers = config.mock || !!sim.data || atLeast(role, "moderator");
-  const me = useMe();
+  const viewer = useViewer();
   const login = useLogin();
-  const linkLogin = useLinkTokenLogin();
   const pages = usePages();
   const path = usePathname();
+  const me = useMe();
   const user = me.data?.user;
+  const staff = viewer.status === "member" && viewer.staff;
 
   return (
     <div className="portal">
@@ -277,41 +290,33 @@ export function Shell({ children }: { children: ReactNode }) {
           <ServerSwitcher />
         </div>
         <nav className="portal-nav" aria-label={t.nav.label}>
-          {pages.leaderboard ? <NavLink to="/leaderboard">{t.nav.leaderboard}</NavLink> : null}
-          {pages.ticketsInNav ? <NavLink to="/tickets">{t.nav.tickets}</NavLink> : null}
-          {showDevelopers ? <NavLink to="/developers">{t.nav.developers}</NavLink> : null}
+          <NavLink to="/activity">{t.nav.activity}</NavLink>
+          {pages.myTickets ? <NavLink to="/tickets">{t.nav.myTickets}</NavLink> : null}
+          {pages.support && staff ? <NavLink to="/support">{t.nav.support}</NavLink> : null}
+          {pages.profile && user ? <NavLink to="/me">{t.nav.profile}</NavLink> : null}
         </nav>
         <div className="portal-header__end">
           {user ? (
-            pages.profile ? (
-              <Link
-                to="/me"
-                className="portal-user"
-                aria-current={path === "/me" ? "page" : undefined}
-              >
-                <Avatar src={user.avatarUrl || undefined} name={user.displayName} size={30} />
-                <span className="portal-user__name">{user.displayName}</span>
-              </Link>
-            ) : (
-              <span className="portal-user">
-                <Avatar src={user.avatarUrl || undefined} name={user.displayName} size={30} />
-                <span className="portal-user__name">{user.displayName}</span>
-              </span>
-            )
-          ) : me.status === "success" && linkLogin.status !== "pending" ? (
+            <span className="portal-user">
+              <Avatar src={user.avatarUrl || undefined} name={user.displayName} size={30} />
+              <span className="portal-user__name">{user.displayName}</span>
+            </span>
+          ) : viewer.status === "signedOut" ? (
             <Button size="sm" variant="secondary" onClick={login}>
               {t.loginShort}
             </Button>
           ) : null}
         </div>
       </header>
-      <main id="main" className="portal-main">
+      <main id="main" className="portal-main" tabIndex={-1}>
         {children}
       </main>
       <footer className="portal-footer">
         <span>
-          {t.poweredBy(server.name)} <a href="https://github.com/cicord">Cicord</a>
+          {t.poweredBy(server.name)} <a href="https://cicord.dev">Cicord</a>
         </span>
+        <span aria-hidden="true"> · </span>
+        <Link to="/developers">{t.nav.developers}</Link>
       </footer>
       {config.mock ? <p className="portal-mock-badge">{t.demoMode}</p> : null}
     </div>
@@ -320,7 +325,7 @@ export function Shell({ children }: { children: ReactNode }) {
 
 /**
  * The sign-in block: Discord OAuth, plus — when the runtime runs the Discord simulator
- * (`cicord dev --sim`, which has no OAuth) — one button per simulated user.
+ * (`cicord dev --sim`, which has no OAuth) — one button per simulated member.
  */
 export function SignIn({ size = "lg" }: { size?: "md" | "lg" }) {
   const t = useT();
@@ -375,8 +380,73 @@ export function CenteredMessage({ title, children }: { title: string; children?:
   );
 }
 
-/** Formats a number with the interface locale. */
-export function useNumber(): (n: number) => string {
+export function PageLoading({ fullscreen = false }: { fullscreen?: boolean }) {
   const t = useT();
-  return (n) => new Intl.NumberFormat(t.locale).format(n);
+  return (
+    <div className={fullscreen ? "portal-loading" : "portal-loading portal-loading--inline"}>
+      <Spinner size="lg" label={t.loading} />
+    </div>
+  );
+}
+
+/**
+ * Shows `children` to members of the server only: a sign-in block when signed out, a notice
+ * when the Discord account is not a member. With `staff`, moderators and admins only.
+ * The runtime enforces the same rules on every route (401/403); this is the friendly face.
+ */
+export function RequireMember({
+  title,
+  staff = false,
+  children,
+}: {
+  /** Heading of the sign-in block. */
+  title: string;
+  staff?: boolean;
+  children: (viewer: Extract<Viewer, { status: "member" }>) => ReactNode;
+}) {
+  const t = useT();
+  const viewer = useViewer();
+  switch (viewer.status) {
+    case "loading":
+      return <PageLoading />;
+    case "signedOut":
+      return (
+        <div className="gate">
+          <h1>{title}</h1>
+          <p>{t.gate.signInText}</p>
+          <SignIn />
+        </div>
+      );
+    case "notMember":
+      return (
+        <div className="gate">
+          <h1>{title}</h1>
+          <Notice tone="info">{t.gate.notMember}</Notice>
+        </div>
+      );
+    case "error":
+      return (
+        <div className="gate">
+          <Notice
+            tone="error"
+            title={t.gate.failed}
+            action={
+              <Button size="sm" variant="secondary" onClick={viewer.retry}>
+                {t.retry}
+              </Button>
+            }
+          />
+        </div>
+      );
+  }
+  if (staff && !viewer.staff)
+    return (
+      <CenteredMessage title={t.gate.staffTitle}>
+        <p>{t.gate.staffText}</p>
+        <Link to="/" className="cicord-button cicord-button--secondary cicord-button--md">
+          <span className="cicord-button__label">{t.notFound.home}</span>
+        </Link>
+      </CenteredMessage>
+    );
+  return <>{children(viewer)}</>;
 }

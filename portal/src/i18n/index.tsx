@@ -1,10 +1,13 @@
 import { createContext, useContext, useEffect, type ReactNode } from "react";
-import { en } from "./en.ts";
-import { fr, type Messages } from "./fr.ts";
+import { en, type Messages } from "./en.ts";
 
 export type { Messages };
 
-const messages: Record<string, Messages> = { en, fr };
+/**
+ * Interface languages. The community speaks English (`spec.portal.locale: en`); a language
+ * is added with one file typed `Messages` (see en.ts) and one entry here.
+ */
+const messages: Record<string, Messages> = { en };
 
 /** `spec.portal.locale` when set and supported, else the browser language, else English. */
 export function pickLocale(serverLocale?: string): string {

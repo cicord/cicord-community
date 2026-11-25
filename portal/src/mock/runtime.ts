@@ -1,22 +1,37 @@
 /**
- * In-browser fake of the Cicord runtime for `vp dev --mode mock`: portal endpoints, auth
- * (link token, dev login, logout), the onboarding plugin routes and the showcase plugins
- * (levels, tickets), mirroring https://cicord.dev/docs/reference/http-api/, examples/basic/plugins/onboarding and
- * examples/showcase. State lives in sessionStorage so it
- * survives the reload that follows a login.
+ * In-browser fake of the Cicord runtime for `vp dev --mode mock` and the tests: the portal
+ * endpoints (servers, server, me, analytics), auth (signed link, dev login, logout) and the
+ * routes of the tickets plugin, mirroring https://cicord.dev/docs/reference/http-api/portal/.
+ * State lives in sessionStorage so it survives the reload that follows a login.
+ *
+ * In `pnpm dev`, the URL picks the scenario: `?role=member|moderator|admin`,
+ * `?analytics=members|public|off` (off: the server does not share its activity) and
+ * `?mode=light|dark|system`.
  */
-import type { FetchLike } from "@cicord/client";
-import { leaderboard, onboardingConfig, portalServer, roles, tickets, user } from "./data.ts";
+import type { AccessRole, FetchLike } from "@cicord/client";
+import { mockAnalytics } from "./analytics.ts";
+import { portalServer, roles, viewers, type MockAnalytics } from "./data.ts";
+import { seedTickets, ticketsRoute, type TicketStore } from "./tickets.ts";
+
+export interface MockOptions {
+  /** The viewer's access role. Default: `?role=`, else member. */
+  role?: AccessRole;
+  /** How the server shares its activity. Default: `?analytics=`, else members. */
+  analytics?: MockAnalytics;
+  /** Milliseconds per request. Default 280 (0 in tests). */
+  latency?: number;
+  /** Start signed in. Default: as saved in sessionStorage, else signed out. */
+  signedIn?: boolean;
+}
 
 interface MockState {
   loggedIn: boolean;
-  memberRoles: string[];
-  completedAt: string | null;
+  tickets: TicketStore;
 }
 
 const STORAGE = "cicord-portal:mock";
-const LATENCY = 320;
 const API = "/api/v1";
+const TICKETS = `${API}/portal/cicord/plugins/cicord/tickets`;
 
 function load(): MockState {
   try {
@@ -25,34 +40,36 @@ function load(): MockState {
   } catch {
     // ignore: fresh state
   }
-  return { loggedIn: false, memberRoles: ["member"], completedAt: null };
+  return { loggedIn: false, tickets: seedTickets() };
 }
 
-const json = (body: unknown, status = 200): Response =>
-  new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
-
-const error = (status: number, code: string, message: string, diagnostics?: unknown[]): Response =>
-  json({ error: diagnostics ? { code, message, diagnostics } : { code, message } }, status);
-
-const roleOut = (key: string) => {
-  const r = roles[key];
-  return r ? { key, id: r.id, name: r.name, color: r.color } : undefined;
-};
-
-/** `?role=moderator|admin` previews the moderator pages in mock mode. */
-function viewerRole(): "member" | "moderator" | "admin" {
-  const role = new URLSearchParams(window.location.search).get("role");
+/** A URL parameter of the page, remembered for the session (it is lost on login redirects). */
+function param<T extends string>(name: string, allowed: readonly T[]): T | undefined {
+  const value = new URLSearchParams(window.location.search).get(name);
+  const key = `cicord-portal:mock-${name}`;
   try {
-    if (role) sessionStorage.setItem("cicord-portal:mock-role", role);
-    const saved = role ?? sessionStorage.getItem("cicord-portal:mock-role");
-    return saved === "moderator" || saved === "admin" ? saved : "member";
+    if (value) sessionStorage.setItem(key, value);
+    const saved = value ?? sessionStorage.getItem(key);
+    return allowed.find((a) => a === saved);
   } catch {
-    return role === "moderator" || role === "admin" ? role : "member";
+    return allowed.find((a) => a === value);
   }
 }
 
-export function createMockRuntime() {
+const json = (body: unknown, status = 200): Response =>
+  status === 204
+    ? new Response(null, { status })
+    : new Response(JSON.stringify(body), {
+        status,
+        headers: { "Content-Type": "application/json" },
+      });
+
+const error = (status: number, code: string, message: string): Response =>
+  json({ error: { code, message } }, status);
+
+export function createMockRuntime(options: MockOptions = {}) {
   let state = load();
+  if (options.signedIn !== undefined) state = { ...state, loggedIn: options.signedIn };
   const save = (next: Partial<MockState>) => {
     state = { ...state, ...next };
     try {
@@ -61,116 +78,63 @@ export function createMockRuntime() {
       // ignore
     }
   };
+  const role = (): AccessRole =>
+    options.role ?? param("role", ["member", "moderator", "admin"]) ?? "member";
+  const sharing = (): MockAnalytics =>
+    options.analytics ?? param("analytics", ["members", "public", "off"]) ?? "members";
+  const mode = () => param("mode", ["light", "dark", "system"]) ?? "system";
+  const viewer = () => viewers[role()];
+  const server = () => portalServer(mode());
 
   const me = () => ({
-    user,
-    servers: [{ key: portalServer.key, name: portalServer.name, role: "member" }],
+    user: viewer().user,
+    servers: [{ key: "cicord", name: "Cicord", role: role() }],
   });
 
   const portalMe = () => ({
-    user,
+    user: viewer().user,
     member: {
       nick: "",
-      joinedAt: "2025-03-14T18:20:00Z",
-      roles: state.memberRoles
-        .map((k) => roleOut(k))
-        .filter((r) => r !== undefined)
-        .map(({ key, id, name, color }) => ({ key, id, name, color })),
+      joinedAt: "2026-03-14T18:20:00Z",
+      roles: viewer()
+        .roles.map((key) => {
+          const r = roles[key];
+          return r ? { key, id: r.id, name: r.name, color: r.color } : undefined;
+        })
+        .filter((r) => r !== undefined),
     },
-    role: viewerRole(),
+    role: role(),
   });
 
-  const steps = () => ({
-    title: onboardingConfig.title,
-    intro: onboardingConfig.intro,
-    completed: state.completedAt !== null,
-    completedAt: state.completedAt,
-    completedRole: onboardingConfig.completedRole
-      ? (roleOut(onboardingConfig.completedRole) ?? null)
-      : null,
-    steps: onboardingConfig.steps.map((step) => {
-      const options = step.options.map((o) => {
-        const r = roles[o.role]!;
-        return {
-          role: o.role,
-          label: o.label ?? r.name,
-          emoji: o.emoji ?? "",
-          description: o.description ?? "",
-          name: r.name,
-          color: r.color,
-        };
-      });
-      return {
-        id: step.id,
-        title: step.title,
-        description: step.description ?? "",
-        multiple: step.multiple ?? false,
-        required: step.required ?? false,
-        options,
-        selected: options.filter((o) => state.memberRoles.includes(o.role)).map((o) => o.role),
-      };
-    }),
-  });
-
-  const complete = (body: unknown): Response => {
-    const answers = (body as { answers?: unknown } | undefined)?.answers;
-    if (!answers || typeof answers !== "object" || Array.isArray(answers)) {
-      return error(400, "invalid", 'expected a JSON body {"answers": {…}}');
-    }
-    const raw = answers as Record<string, unknown>;
-    const problems: { severity: "error"; path: string; message: string }[] = [];
-    const wanted = new Set<string>();
-    for (const id of Object.keys(raw)) {
-      if (!onboardingConfig.steps.some((s) => s.id === id)) {
-        problems.push({
-          severity: "error",
-          path: `/answers/${id}`,
-          message: `unknown step "${id}"`,
-        });
-      }
-    }
-    for (const step of onboardingConfig.steps) {
-      const picked = Array.isArray(raw[step.id]) ? [...new Set(raw[step.id] as string[])] : [];
-      const path = `/answers/${step.id}`;
-      for (const role of picked) {
-        if (!step.options.some((o) => o.role === role)) {
-          problems.push({ severity: "error", path, message: `"${role}" n'est pas une option` });
-        }
-      }
-      if (!step.multiple && picked.length > 1)
-        problems.push({ severity: "error", path, message: "Un seul choix possible" });
-      if (step.required && picked.length === 0)
-        problems.push({ severity: "error", path, message: "Cette question est obligatoire" });
-      for (const role of picked) wanted.add(role);
-    }
-    if (problems.length > 0)
-      return error(422, "invalid", problems.map((p) => p.message).join("; "), problems);
-
-    const offered = new Set(onboardingConfig.steps.flatMap((s) => s.options.map((o) => o.role)));
-    if (onboardingConfig.completedRole) {
-      offered.add(onboardingConfig.completedRole);
-      wanted.add(onboardingConfig.completedRole);
-    }
-    const current = new Set(state.memberRoles);
-    const added = [...offered].filter((r) => wanted.has(r) && !current.has(r));
-    const removed = [...offered].filter((r) => !wanted.has(r) && current.has(r));
-    const next = [...state.memberRoles.filter((r) => !removed.includes(r)), ...added];
-    const completedAt = new Date().toISOString();
-    save({ memberRoles: next, completedAt });
-    return json({
-      completed: true,
-      completedAt,
-      roles: next.map((k) => roleOut(k)).filter((r) => r !== undefined),
-      added,
-      removed,
-      message: onboardingConfig.successMessage,
-    });
+  const analytics = (query: URLSearchParams): Response => {
+    const share = sharing();
+    if (share === "off") return error(404, "not_found", "not found");
+    if (share === "members" && !state.loggedIn)
+      return error(401, "unauthenticated", "login required");
+    const period = query.get("period") ?? "30d";
+    if (period !== "7d" && period !== "30d" && period !== "90d")
+      return error(400, "invalid", "period must be 7d, 30d or 90d");
+    return json(mockAnalytics(period));
   };
 
   const route = (method: string, path: string, body: unknown, query: URLSearchParams): Response => {
     const auth = (fn: () => Response) =>
       state.loggedIn ? fn() : error(401, "unauthenticated", "login required");
-    const key = portalServer.key;
+    if (path.startsWith(`${TICKETS}/`)) {
+      return auth(() => {
+        const person = { id: viewer().user.id, displayName: viewer().user.displayName };
+        const reply = ticketsRoute(
+          state.tickets,
+          { person, staff: role() !== "member" },
+          method,
+          path.slice(TICKETS.length),
+          query,
+          body,
+        );
+        if (method !== "GET") save({ tickets: state.tickets });
+        return json(reply.body, reply.status);
+      });
+    }
     switch (`${method} ${path}`) {
       case "POST /auth/link":
       case "POST /auth/dev-login":
@@ -178,55 +142,28 @@ export function createMockRuntime() {
         return json(me());
       case "POST /auth/logout":
         save({ loggedIn: false });
-        return new Response(null, { status: 204 });
+        return json(null, 204);
       case `GET ${API}/me`:
         return auth(() => json(me()));
       case `GET ${API}/portal/servers`:
-        return json({ items: [portalServer] });
-      case `GET ${API}/portal/${key}`:
-        return json(portalServer);
-      case `GET ${API}/portal/${key}/me`:
+        return json({ items: [server()] });
+      case `GET ${API}/portal/cicord`:
+        return json(server());
+      case `GET ${API}/portal/cicord/me`:
         return auth(() => json(portalMe()));
-      case `GET ${API}/portal/${key}/plugins/moderator/onboarding/steps`:
-        return auth(() => json(steps()));
-      case `POST ${API}/portal/${key}/plugins/moderator/onboarding/complete`:
-        return auth(() => complete(body));
-      case `GET ${API}/portal/${key}/plugins/moderator/levels/leaderboard`:
-        return json({ items: leaderboard });
-      case `GET ${API}/portal/${key}/plugins/moderator/levels/me`:
-        // The shape of the levels contract (`Standing`, examples/showcase/plugins/levels/src/routes.ts).
-        return auth(() => {
-          const top = leaderboard[0]!;
-          return json({
-            userId: top.userId,
-            rank: top.rank,
-            xp: top.xp,
-            level: top.level,
-            current: 1260,
-            needed: 2080,
-          });
-        });
-      case `GET ${API}/portal/${key}/plugins/moderator/tickets/tickets`:
-        // A moderator route: `?role=moderator` makes the mock viewer a moderator.
-        return auth(() =>
-          viewerRole() === "member"
-            ? error(403, "forbidden", "this route requires the moderator role")
-            : json({
-                items: tickets.filter(
-                  (t) => !query.get("status") || t.status === query.get("status"),
-                ),
-              }),
-        );
+      case `GET ${API}/portal/cicord/analytics`:
+        return analytics(query);
       default:
         return error(404, "not_found", `mock: no route ${method} ${path}`);
     }
   };
 
+  const latency = options.latency ?? 280;
   const fetch: FetchLike = async (input, init) => {
     const url = new URL(input, window.location.origin);
     const method = (init.method ?? "GET").toUpperCase();
     const body = typeof init.body === "string" ? (JSON.parse(init.body) as unknown) : undefined;
-    await new Promise((resolve) => setTimeout(resolve, LATENCY));
+    if (latency > 0) await new Promise((resolve) => setTimeout(resolve, latency));
     return route(method, url.pathname, body, url.searchParams);
   };
 
@@ -237,10 +174,6 @@ export function createMockRuntime() {
       const url = new URL(redirect || "/", window.location.origin);
       url.searchParams.set("cicord_token", "mock-signed-token");
       return `${url.pathname}${url.search}${url.hash}`;
-    },
-    reset(): void {
-      sessionStorage.removeItem(STORAGE);
-      state = load();
     },
   };
 }
