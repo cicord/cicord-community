@@ -5,8 +5,9 @@
 #   cd portal && pnpm dev:runtime        hot-reloading portal on http://localhost:5174
 #
 # The portal's Activity page needs a runtime with GET /portal/{server}/analytics, which
-# Cicord 0.1.4 (the latest image) does not have yet. Until the next release, build the
-# image from a checkout of github.com/cicord/cicord and point CICORD_IMAGE at it:
+# Cicord 0.1.4 (the latest image) does not have, and cicord.yaml requires 0.1.5. Until
+# 0.1.5 is released, build the image from a checkout of github.com/cicord/cicord and point
+# CICORD_IMAGE at it:
 #
 #   docker build -t cicord:main ../cicord && CICORD_IMAGE=cicord:main docker compose up
 #

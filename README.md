@@ -114,7 +114,8 @@ activity history, and `servers/cicord.yaml` may not share it: the Activity page 
 its empty state, and `pnpm dev` shows it with sample data.
 
 The Activity page calls `GET /api/v1/portal/{server}/analytics`, which the published image
-(Cicord 0.1.4) does not serve yet. Until the next release, build the image from a checkout of
+(Cicord 0.1.4) does not serve yet, and this repository requires Cicord 0.1.5
+(`spec.engine`). Until 0.1.5 is released, build the image from a checkout of
 [cicord/cicord](https://github.com/cicord/cicord) and use it:
 
 ```sh
@@ -124,10 +125,27 @@ CICORD_IMAGE=cicord:main docker compose up
 
 `cicord dev --sim` with a `cicord` binary built from source does the same without Docker.
 
-`src/tickets/api.ts` mirrors the route contract of the `tickets` plugin 0.2 until
-`cicord portal typegen` generates it into `src/cicord-routes.d.ts` (once `bots/cicord/bot.yaml`
-runs tickets 0.2); its two hooks then give way to `useRouteQuery("tickets", …)` and
-`useRouteMutation("tickets", …)` from `@cicord/react`.
+### When tickets 0.2.0 is published
+
+The ticket pages need `tickets` 0.2.0, not yet in the registry. When it is, in
+`bots/cicord/bot.yaml`:
+
+- `version: ^0.2.0` for the `tickets` instance (then `cicord plugin update`, which pins it in
+  `cicord.lock`);
+- add `discord.members.read` to its `grants` (0.2 checks that an assignee is on the staff and
+  lists the holders of the staff roles in `GET /staff`; Cicord requires every requested
+  capability to be granted);
+- intents: 0.2 also declares `MessageContent` (the staff portal reads the last 50 messages of
+  a ticket channel at request time; nothing is stored). The bot already has it, for the
+  analytics; update the comment on `intents` to mention tickets.
+
+Then, in `portal/`: `cicord portal typegen` (or `cicord portal build`) writes the tickets 0.2
+contract into `src/cicord-routes.d.ts`. `src/tickets/api.ts` mirrors that contract today, so
+the swap is mechanical: delete its contract types and import them from the generated
+namespace, and replace `useTicketsQuery(route, …)` / `useTicketsMutation(route, …)` by
+`useRouteQuery("tickets", route, …)` / `useRouteMutation("tickets", route, …)` from
+`@cicord/react` (same arguments). Until then the pages stay hidden: they appear only when the
+tickets instance serves the 0.2 routes.
 
 ## Learn more
 
