@@ -22,6 +22,7 @@ import {
   type StaffTicket,
   type StaffTicketDetail,
   type StaffTicketQuery,
+  type TicketMessage,
 } from "./api.ts";
 import {
   BackLink,
@@ -435,18 +436,77 @@ export function readableMentions(content: string, names: ReadonlyMap<string, str
     .replace(/<#\d+>/g, "#channel");
 }
 
+/**
+ * One message of the ticket channel. A reply sent from the portal is posted by the bot as an
+ * embed: it is shown under the staff member who wrote it (`repliedBy`), marked "via portal".
+ * Other bot messages (welcome, assignment, reopen) show their text and embeds as the bot's;
+ * members' and staff's own messages their text.
+ */
+function MessageItem({
+  message: m,
+  names,
+}: {
+  message: TicketMessage;
+  names: ReadonlyMap<string, string>;
+}) {
+  const t = useT();
+  const f = useFormat();
+  const author = m.repliedBy ?? m.author;
+  const bot = m.author.bot && !m.repliedBy;
+  const inline = (text: string, key: string) => renderInline(readableMentions(text, names), key);
+  const embeds = m.embeds.filter((e) => e.title || e.description);
+  return (
+    <li className={bot ? "message message--bot" : "message"}>
+      <Avatar name={author.displayName} size={32} />
+      <div className="message__body">
+        <p className="message__head">
+          <strong>{author.displayName}</strong>
+          {bot ? <span className="message__bot">{t.support.bot}</span> : null}
+          {m.repliedBy ? <span className="message__via">{t.support.viaPortal}</span> : null}
+          <time dateTime={m.createdAt} title={f.dateTime(m.createdAt)}>
+            {f.relative(m.createdAt)}
+          </time>
+        </p>
+        {m.content ? <p className="message__content">{inline(m.content, `${m.id}-c`)}</p> : null}
+        {m.repliedBy
+          ? embeds.map((e) => (
+              <p key={`${e.title ?? ""}|${e.description ?? ""}`} className="message__content">
+                {inline(e.description ?? e.title ?? "", `${m.id}-e`)}
+              </p>
+            ))
+          : embeds.map((e) => (
+              <div key={`${e.title ?? ""}|${e.description ?? ""}`} className="message__embed">
+                {e.title ? (
+                  <p className="message__embed-title">{inline(e.title, `${m.id}-t`)}</p>
+                ) : null}
+                {e.description ? (
+                  <p className="message__content">{inline(e.description, `${m.id}-d`)}</p>
+                ) : null}
+              </div>
+            ))}
+        {!m.content && embeds.length === 0 ? (
+          <p className="message__content message__content--none">{t.support.noText}</p>
+        ) : null}
+      </div>
+    </li>
+  );
+}
+
 function Conversation({ ticket }: { ticket: StaffTicketDetail }) {
   const t = useT();
   const names = useMemo(
     () =>
       new Map(
-        [ticket.author, ticket.assignee, ...(ticket.messages ?? []).map((m) => m.author)]
+        [
+          ticket.author,
+          ticket.assignee,
+          ...(ticket.messages ?? []).flatMap((m) => [m.author, m.repliedBy]),
+        ]
           .filter((p) => p !== null)
           .map((p) => [p.id, p.displayName]),
       ),
     [ticket],
   );
-  const f = useFormat();
   const id = useId();
   const [content, setContent] = useState("");
   const [touched, setTouched] = useState(false);
@@ -480,25 +540,7 @@ function Conversation({ ticket }: { ticket: StaffTicketDetail }) {
       ) : (
         <ol className="conversation">
           {ticket.messages.map((m) => (
-            <li key={m.id} className={m.author.bot ? "message message--bot" : "message"}>
-              <Avatar name={m.author.displayName} size={32} />
-              <div className="message__body">
-                <p className="message__head">
-                  <strong>{m.author.displayName}</strong>
-                  {m.author.bot ? <span className="message__bot">{t.support.bot}</span> : null}
-                  <time dateTime={m.createdAt} title={f.dateTime(m.createdAt)}>
-                    {f.relative(m.createdAt)}
-                  </time>
-                </p>
-                {m.content ? (
-                  <p className="message__content">
-                    {renderInline(readableMentions(m.content, names), m.id)}
-                  </p>
-                ) : (
-                  <p className="message__content message__content--none">{t.support.noText}</p>
-                )}
-              </div>
-            </li>
+            <MessageItem key={m.id} message={m} names={names} />
           ))}
         </ol>
       )}

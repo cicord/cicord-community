@@ -34,7 +34,7 @@ import {
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
 // ───────────────────────────────────────────────────────────── contract
-// Mirrors plugins/tickets/src/routes.ts of tickets 0.2.0 (cicord/cicord-plugins, 05cdd81), the
+// Mirrors plugins/tickets/src/routes.ts of tickets 0.2.0 (cicord/cicord-plugins, f3cb2c7), the
 // plugin's route contract, with its `Routes` interface named `TicketsRoutes` here.
 //
 // Errors are `{error: {code, message}}` bodies: 400 `invalid`, 403 `forbidden` (not on the
@@ -132,11 +132,21 @@ export interface StaffTicket {
   source: TicketSource;
 }
 
+/** The text of an embed of a ticket message (bot messages: replies, notices). */
+export interface TicketEmbed {
+  title: string | null;
+  description: string | null;
+}
+
 /** A message of the ticket channel, read from Discord at request time (never stored). */
 export interface TicketMessage {
   id: string;
   author: Person & { bot: boolean };
   content: string;
+  /** The text of its embeds (a portal reply is an embed posted by the bot). */
+  embeds: TicketEmbed[];
+  /** For a reply sent from the portal: the staff member who wrote it (the author is the bot). */
+  repliedBy: Person | null;
   createdAt: string;
 }
 

@@ -190,9 +190,12 @@ describe("staff", () => {
     const reply = await screen.findByRole("textbox", { name: "Reply" });
     await user.type(reply, "The account is banned, thanks!");
     await user.click(screen.getByRole("button", { name: "Send reply" }));
-    // tickets 0.2 posts the reply as an embed: the channel message has no text content.
+    // The bot posts the reply as an embed; the portal shows it under the staff member.
     expect(await screen.findByText("Sam replied from the portal")).toBeTruthy();
-    expect(screen.getByText(/^No text: an embed/)).toBeTruthy();
+    const posted = screen.getByText("The account is banned, thanks!").closest("li")!;
+    expect(within(posted).getByText("Sam")).toBeTruthy();
+    expect(within(posted).getByText("via portal")).toBeTruthy();
+    expect(within(posted).queryByText("Bot")).toBeNull();
     expect((reply as HTMLTextAreaElement).value).toBe("");
     expect(calls.find((c) => c.path.endsWith("/messages"))?.body).toEqual({
       content: "The account is banned, thanks!",
@@ -256,4 +259,20 @@ test("the conversation shows mentions as names and the label removal in the hist
   ).toBeTruthy();
   await user.selectOptions(screen.getByRole("combobox", { name: "Label" }), "");
   expect(await screen.findByText("Morgan removed the label")).toBeTruthy();
+});
+
+test("bot notices show their text and embeds as the bot's", async () => {
+  const user = userEvent.setup();
+  renderPortal("/support/48", { role: "admin" });
+  // The welcome message carries the ticket as an embed.
+  const welcome = (await screen.findByText(/^Hi @Robin, thanks for reaching out!/)).closest("li")!;
+  expect(within(welcome).getByText("Bot")).toBeTruthy();
+  expect(within(welcome).getByText(/^I changed the topic of #my-project/)).toBeTruthy();
+  // Assigning posts a notice in the channel, with Discord's bold rendered.
+  await user.click(screen.getByRole("button", { name: "Take it" }));
+  const assigned = await screen.findByText(
+    (_, el) => el?.tagName === "P" && el.textContent === "Assigned to Morgan.",
+  );
+  expect(assigned.querySelector("strong")?.textContent).toBe("Morgan");
+  expect(within(assigned.closest("li")!).getByText("Bot")).toBeTruthy();
 });

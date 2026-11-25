@@ -1581,6 +1581,25 @@ code {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+.message__via {
+  padding: 0 6px;
+  border: 1px solid var(--cicord-line-strong);
+  border-radius: 999px;
+  color: var(--cicord-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.message__embed {
+  margin-top: 6px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--cicord-primary);
+  border-radius: 4px;
+  background: var(--cicord-sunken);
+}
+.message__embed-title {
+  margin: 0;
+  font-weight: 700;
+}
 .message__content--none {
   font-style: italic;
 }

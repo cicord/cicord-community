@@ -45,6 +45,11 @@ const fail = (status: number, code: string, message: string): Reply => ({
 });
 const label = (key: string | null) => TICKET_LABELS.find((l) => l.key === key) ?? null;
 const channelUrl = (id: string) => `https://discord.com/channels/${SERVER_ID}/${id}`;
+/** The ticket card the plugin posts in the channel (welcome, reopen). */
+const ticketEmbed = (t: { subject: string; description: string }) => ({
+  title: t.subject,
+  description: t.description,
+});
 
 /** A few tickets of the community, some for the member viewer, most for the queue. */
 export function seedTickets(now: number = Date.now()): TicketStore {
@@ -61,6 +66,8 @@ export function seedTickets(now: number = Date.now()): TicketStore {
     id: `m${message++}`,
     author: { ...author, bot: isBot },
     content,
+    embeds: [],
+    repliedBy: null,
     createdAt: ago(now, hoursAgo),
   });
   const welcome = (who: Person, hoursAgo: number) =>
@@ -79,7 +86,7 @@ export function seedTickets(now: number = Date.now()): TicketStore {
     extra: Partial<TicketRecord>,
   ): TicketRecord => {
     const channel = `ch${n}`;
-    return {
+    const record: TicketRecord = {
       id: String(n),
       number: n,
       subject,
@@ -102,6 +109,11 @@ export function seedTickets(now: number = Date.now()): TicketStore {
       conversation: [welcome(author, openedHoursAgo)],
       ...extra,
     };
+    // The welcome message carries the ticket as an embed, as the plugin posts it.
+    const [first, ...rest] = record.conversation;
+    if (first?.author.bot)
+      record.conversation = [{ ...first, embeds: [ticketEmbed(record)] }, ...rest];
+    return record;
   };
 
   const tickets: TicketRecord[] = [
@@ -342,6 +354,20 @@ export function ticketsRoute(
     t.events = [...t.events, { ...e, at, by: viewer.person }].slice(-100);
     t.lastActivityAt = at;
   };
+  /** A message of the bot in the ticket channel. */
+  const notice = (
+    t: TicketRecord,
+    content: string,
+    embeds: TicketMessage["embeds"] = [],
+    repliedBy: Person | null = null,
+  ): string => {
+    const id = `m-${t.number}-${t.conversation.length + 1}`;
+    t.conversation = [
+      ...t.conversation,
+      { id, author: bot, content, embeds, repliedBy, createdAt: at },
+    ];
+    return id;
+  };
 
   // ── members
   if (method === "GET" && path === "/tickets/mine") {
@@ -394,15 +420,13 @@ export function ticketsRoute(
       closeReason: null,
       summary: null,
       events: [{ type: "opened", at, by: viewer.person, detail: "portal" }],
-      conversation: [
-        {
-          id: `m-${n}`,
-          author: bot,
-          content: `Hi <@${viewer.person.id}>, thanks for reaching out! <@&110001> <@&110002> will be with you shortly.`,
-          createdAt: at,
-        },
-      ],
+      conversation: [],
     };
+    notice(
+      ticket,
+      `Hi <@${viewer.person.id}>, thanks for reaching out! <@&110001> <@&110002> will be with you shortly.`,
+      [ticketEmbed(ticket)],
+    );
     store.tickets.push(ticket);
     return ok(mine(ticket), 201);
   }
@@ -477,6 +501,7 @@ export function ticketsRoute(
     if (t.assignee?.id !== person.id) {
       t.assignee = person;
       event(t, { type: "assigned", detail: person.displayName });
+      notice(t, `Assigned to **${person.displayName}**.`);
     }
     return ok(staffItem(t));
   }
@@ -508,24 +533,16 @@ export function ticketsRoute(
     t.summary = null;
     t.channelUrl = channelUrl(t.channelId);
     event(t, { type: "reopened" });
+    notice(t, `<@${t.author.id}> Reopened by **${viewer.person.displayName}**.`, [ticketEmbed(t)]);
     return ok(staffItem(t));
   }
   if (method === "POST" && action === "messages") {
     if (t.status === "closed") return fail(409, "closed", "the ticket is closed");
     const content = text(input, "content", LIMITS.reply.min, LIMITS.reply.max);
     if (isReply(content)) return content;
-    const id = `m-${t.number}-${t.conversation.length + 1}`;
-    t.conversation = [
-      ...t.conversation,
-      {
-        id,
-        author: bot,
-        // Posted as an embed (the text and "— name (via portal)" in it), as tickets 0.2 does:
-        // the message has no text content.
-        content: "",
-        createdAt: at,
-      },
-    ];
+    // Posted by the bot as an embed signed "— name (via portal)", as tickets 0.2 does; the
+    // plugin finds who wrote it in the timeline (`repliedBy`).
+    const id = notice(t, "", [{ title: null, description: content }], viewer.person);
     event(t, { type: "replied", detail: id });
     return ok({ id }, 201);
   }
