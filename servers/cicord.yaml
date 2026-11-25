@@ -10,6 +10,12 @@ metadata:
   name: cicord
 spec:
   discordId: "1574757803220803697"
+  # Activity analytics (admin console → Analytics), on by default. presence: statuses,
+  # platforms and activities of the members, aggregated (counts only); it needs the
+  # ServerPresences intent of bots/cicord/bot.yaml.
+  # Reference: https://cicord.dev/docs/self-hosting/analytics/
+  analytics:
+    presence: true
   profile:
     name: Cicord
     description: The community of Cicord, GitOps for Discord. Contributors, plugin authors, self-hosters and users.
