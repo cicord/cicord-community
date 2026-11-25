@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <radialGradient id="glow-g" cx="72%" cy="24%" r="55%">
+      <stop offset="0" stop-color="#3dd68c" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#3dd68c" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow-b" cx="72%" cy="78%" r="55%">
+      <stop offset="0" stop-color="#5865f2" stop-opacity=".30"/>
+      <stop offset="1" stop-color="#5865f2" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="#0b0b0f"/>
+  <rect width="1024" height="1024" fill="url(#glow-g)"/>
+  <rect width="1024" height="1024" fill="url(#glow-b)"/>
+  <!-- The Cicord mark (assets/logo.svg, 32-unit grid), centred for Discord's round crop. -->
+  <g transform="translate(512 512) scale(27) translate(-17 -16)">
+    <path d="M15 15l5-4M15 17l5 4" stroke="#ededef" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <circle cx="11" cy="16" r="4" fill="none" stroke="#ededef" stroke-width="2.5"/>
+    <circle cx="23" cy="9" r="3" fill="#3dd68c"/>
+    <circle cx="23" cy="23" r="3" fill="#5865f2"/>
+  </g>
+</svg>
