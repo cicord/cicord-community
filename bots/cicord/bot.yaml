@@ -22,9 +22,15 @@ spec:
     activity: { type: watching, name: the config repo }
   servers: [cicord]
   # The plugins' manifests already declare their intents; they are listed here so that the
-  # privileged one is visible in review. ServerMembers (privileged): welcome, moderation and
-  # audit-log. No plugin here needs MessageContent: none of them reads what members write.
-  intents: [ServerMessages, ServerMembers]
+  # privileged ones are visible in review. ServerMembers (privileged): welcome, moderation,
+  # audit-log, and which members are bots for the analytics. MessageContent (privileged): the
+  # analytics count attachments and polls (Discord strips them from messages without it);
+  # no plugin here reads what members write. ServerPresences (privileged): the analytics'
+  # presence aggregates (spec.analytics.presence in servers/cicord.yaml); only counts are
+  # stored, never who is online. Each privileged intent must also be turned on in the
+  # Discord developer portal (Bot → Privileged Gateway Intents) BEFORE this file is merged:
+  # Discord refuses the connection otherwise.
+  intents: [ServerMessages, ServerMembers, MessageContent, ServerPresences]
   plugins:
     # Greets new members in #general and gives them the Member role.
     - name: welcome
