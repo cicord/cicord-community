@@ -1,0 +1,52 @@
+{
+  "name": "cicord-community-portal",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The community portal of the Cicord Discord server (community.cicord.dev): activity and support tickets, built on the Cicord portal SDK.",
+  "type": "module",
+  "scripts": {
+    "dev": "vp dev --mode mock",
+    "dev:runtime": "vp dev",
+    "build": "tsc --noEmit && vp build",
+    "preview": "vp preview",
+    "test": "vp test",
+    "typecheck": "tsc --noEmit",
+    "lint": "vp lint",
+    "fmt": "vp fmt",
+    "check": "vp check && tsc --noEmit",
+    "knip": "knip"
+  },
+  "dependencies": {
+    "@cicord/client": "file:vendor/cicord-client-0.1.5.tgz",
+    "@cicord/react": "file:vendor/cicord-react-0.1.5.tgz",
+    "@cicord/ui": "file:vendor/cicord-ui-0.1.5.tgz",
+    "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",
+    "@fontsource-variable/bricolage-grotesque": "^5.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.13",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "jsdom": "^31.0.1",
+    "knip": "^6.48.0",
+    "typescript": "^7.0.2",
+    "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8000",
+    "vite-plus": "1.7.0"
+  },
+  "overrides": {
+    "@cicord/client": "file:vendor/cicord-client-0.1.5.tgz",
+    "@cicord/react": "file:vendor/cicord-react-0.1.5.tgz",
+    "@cicord/ui": "file:vendor/cicord-ui-0.1.5.tgz",
+    "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8000"
+  },
+  "engines": {
+    "node": ">=26"
+  },
+  "packageManager": "pnpm@12.23.0"
+}

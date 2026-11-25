@@ -1,0 +1,5 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  // index.html → src/main.tsx is detected by the Vite plugin; tests by the Vitest plugin.
+  "project": ["src/**/*.{ts,tsx}", "test/**/*.{ts,tsx}"]
+}

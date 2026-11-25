@@ -1,0 +1,36 @@
+# Local end-to-end testing: the Cicord runtime in dev mode against the Discord simulator,
+# on this repository (servers, bots, plugins and the committed portal build).
+#
+#   docker compose up                    runtime on http://127.0.0.1:7420 (portal at /)
+#   cd portal && pnpm dev:runtime        hot-reloading portal on http://localhost:5174
+#
+# The image is the Cicord release the repository requires (cicord.yaml spec.engine);
+# CICORD_IMAGE picks another one, for example built from a checkout of cicord/cicord.
+#
+# See README.md, "Working on the portal".
+name: cicord-community
+
+services:
+  runtime:
+    image: ${CICORD_IMAGE:-ghcr.io/cicord/cicord:0.1.5}
+    command:
+      - dev
+      - --sim
+      - /repo
+      # Inside the container: listen on every interface, published on the host's loopback
+      # only. The public URL is the address the browser (and the portal's dev proxy) uses.
+      - --listen
+      - 0.0.0.0:7420
+      - --public-url
+      - http://127.0.0.1:7420
+      - --data-dir
+      - /data
+    ports:
+      - 127.0.0.1:7420:7420
+    volumes:
+      # Read-write: admin UI edits in dev mode are written back to these files.
+      - .:/repo
+      - cicord-dev:/data
+
+volumes:
+  cicord-dev:

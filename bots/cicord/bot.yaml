@@ -84,9 +84,13 @@ spec:
     # channels in the Tickets category, a summary of each closed ticket in #mod-log.
     - name: tickets
       source: cicord/tickets
-      version: ^0.1.0
+      version: ^0.2.0
+      # 0.2 serves the community portal (portal/): members follow and open tickets, staff run
+      # the queue. discord.members.read lists the staff (role.members(), ServerMembers); the
+      # staff's conversation view reads ticket channels (MessageContent): both intents are
+      # already enabled for this bot.
       grants: [discord.messages.send, discord.messages.read, discord.channels.read,
-               discord.channels.manage, storage.kv, portal.routes]
+               discord.channels.manage, discord.members.read, storage.kv, portal.routes]
       config:
         panelChannel: welcome
         category: tickets

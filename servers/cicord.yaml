@@ -16,8 +16,16 @@ spec:
   # Reference: https://cicord.dev/docs/self-hosting/analytics/
   analytics:
     presence: true
+    # The community portal (community.cicord.dev) shows the server's activity to its
+    # signed-in members: aggregates only, public channels only, nothing per member.
+    portal: members
   profile:
     name: Cicord
+    # The Cicord mark (assets/icon.svg, rendered with rsvg-convert to icon.png).
+    icon: ../assets/icon.png
+    # Needs boost level 2: shown as blocked in the plan until the server reaches it, then
+    # applied by itself (assets/banner.svg rendered to banner.png, 1920x1080).
+    banner: ../assets/banner.png
     description: The community of Cicord, GitOps for Discord. Contributors, plugin authors, self-hosters and users.
     # Community needs at least "low". "medium" also asks for an account older than 5 minutes,
     # which stops most throwaway spam accounts. It does not apply to members who have a role.
@@ -71,6 +79,9 @@ spec:
                     ManageNicknames, KickMembers, BanMembers, ModerateMembers, ViewAuditLog,
                     ViewServerInsights, MentionEveryone, CreateInstantInvite, MuteMembers,
                     DeafenMembers, MoveMembers, PrioritySpeaker]
+      # Who holds it, reviewed in git (additive: Cicord gives the role, never removes it).
+      members:
+        - "363809724023701504"   # NPjonath (pandawan1), project lead
     moderator:
       name: Moderator
       color: "#eb459e"
@@ -85,6 +96,7 @@ spec:
     plugin-author:
       name: Plugin author
       color: "#23a55a"
+      hoist: true
       # Self-assigned (onboarding, reaction-roles panel in #welcome).
     changelog-ping:
       name: Changelog ping
@@ -402,6 +414,7 @@ spec:
       logo: ../assets/logo.svg      # the Cicord mark, same file as the cicord.dev favicon
       mode: system                  # like cicord.dev: the visitor's setting (set explicitly,
                                     # the reference portal falls back to dark when unset)
+    banner: ../assets/banner.png    # the server banner (assets/banner.svg)
     title: The Cicord community
     tagline: "GitOps for Discord: declare your server in git, review every change, and let Cicord apply it."
     description: |

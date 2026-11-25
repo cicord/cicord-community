@@ -72,16 +72,17 @@ plugins:
             - discord.reactions.manage
             - storage.kv
     cicord/tickets:
-        version: 0.1.0
+        version: 0.2.0
         repo: https://github.com/cicord/cicord-plugins
         path: plugins/tickets
-        commit: 5287d31b787c56f4aff6d7c6dd1e782935c29c1a
-        integrity: sha256-mc8Vjn2jsM3xB8bvgo/EWfveylAnFVCtqc+89Ey3IP4=
+        commit: 3769884c5d56cedefe9bfdcb6431f6dc80ef5e85
+        integrity: sha256-pqYOjKBMfTstTUPBI3Qr7BSAG355JnncWuezUyehU0g=
         capabilities:
             - discord.messages.send
             - discord.messages.read
             - discord.channels.read
             - discord.channels.manage
+            - discord.members.read
             - storage.kv
             - portal.routes
     cicord/welcome:

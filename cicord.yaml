@@ -4,7 +4,7 @@ kind: Project
 metadata:
   name: cicord
 spec:
-  engine: ">=0.1.0 <0.2.0"
+  engine: ">=0.1.5 <0.2.0"   # roles.<key>.members, spec.analytics.portal
   source:
     provider: github
     repo: https://github.com/cicord/cicord-community
@@ -20,3 +20,9 @@ spec:
         mode: commit
       - paths: ["servers/**"]
         mode: pullRequest
+  # The community portal served at / (https://community.cicord.dev): a fork of the reference
+  # portal in portal/, built with `cicord portal build` and committed (CI checks that the
+  # build matches the sources). Its theme, texts and links stay in servers/cicord.yaml.
+  # Reference: https://cicord.dev/docs/portal/custom-portal/
+  portal:
+    path: ./portal/dist
