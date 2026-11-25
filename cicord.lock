@@ -85,6 +85,19 @@ plugins:
             - discord.members.read
             - storage.kv
             - portal.routes
+    cicord/voice-rooms:
+        version: 0.1.0
+        repo: https://github.com/cicord/cicord-plugins.git
+        path: plugins/voice-rooms
+        commit: 6ee54eb689ff15d487ed8398b3948f31036d0093
+        integrity: sha256-fJLjPqV0WUmVE9O+tOv0Bqz/faE2fEj9U73U07YLY0w=
+        capabilities:
+            - discord.channels.read
+            - discord.channels.manage
+            - discord.voice.move
+            - discord.members.read
+            - storage.kv
+            - scheduler
     cicord/welcome:
         version: 0.1.1
         repo: https://github.com/cicord/cicord-plugins
