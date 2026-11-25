@@ -4,19 +4,15 @@
 #   docker compose up                    runtime on http://127.0.0.1:7420 (portal at /)
 #   cd portal && pnpm dev:runtime        hot-reloading portal on http://localhost:5174
 #
-# The portal's Activity page needs a runtime with GET /portal/{server}/analytics, which
-# Cicord 0.1.4 (the latest image) does not have, and cicord.yaml requires 0.1.5. Until
-# 0.1.5 is released, build the image from a checkout of github.com/cicord/cicord and point
-# CICORD_IMAGE at it:
-#
-#   docker build -t cicord:main ../cicord && CICORD_IMAGE=cicord:main docker compose up
+# The image is the Cicord release the repository requires (cicord.yaml spec.engine);
+# CICORD_IMAGE picks another one, for example built from a checkout of cicord/cicord.
 #
 # See README.md, "Working on the portal".
 name: cicord-community
 
 services:
   runtime:
-    image: ${CICORD_IMAGE:-ghcr.io/cicord/cicord:latest}
+    image: ${CICORD_IMAGE:-ghcr.io/cicord/cicord:0.1.5}
     command:
       - dev
       - --sim

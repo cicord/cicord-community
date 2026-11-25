@@ -24,8 +24,8 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version: stable
-      # The Cicord release the portal targets: 0.1.5 serves the portal analytics endpoint
-      # (cicord.yaml spec.engine ">=0.1.5"). This job fails until v0.1.5 is tagged.
+      # The Cicord release the repository requires (cicord.yaml spec.engine ">=0.1.5"): its
+      # typegen and validation, and the first to serve the portal analytics endpoint.
       - run: go install github.com/cicord/cicord/cmd/cicord@v0.1.5
       - name: The plugin route types match the plugins (src/cicord-routes.d.ts)
         working-directory: .
