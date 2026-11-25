@@ -17,9 +17,9 @@
     "knip": "knip"
   },
   "dependencies": {
-    "@cicord/client": "file:vendor/cicord-client-0.1.8.tgz",
-    "@cicord/react": "file:vendor/cicord-react-0.1.8.tgz",
-    "@cicord/ui": "file:vendor/cicord-ui-0.1.8.tgz",
+    "@cicord/client": "0.1.9",
+    "@cicord/react": "0.1.9",
+    "@cicord/ui": "0.1.9",
     "@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
     "react": "^19.3.1",
@@ -40,9 +40,6 @@
     "vite-plus": "1.7.0"
   },
   "overrides": {
-    "@cicord/client": "file:vendor/cicord-client-0.1.8.tgz",
-    "@cicord/react": "file:vendor/cicord-react-0.1.8.tgz",
-    "@cicord/ui": "file:vendor/cicord-ui-0.1.8.tgz",
     "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8000"
   },
   "engines": {
