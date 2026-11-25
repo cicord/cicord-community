@@ -19,7 +19,7 @@ spec:
     secretRef: DISCORD_TOKEN_CICORD
   presence:
     status: online
-    activity: { type: watching, name: the config repo }
+    activity: {type: watching, name: the config repo}
   servers: [cicord]
   # The plugins' manifests already declare their intents; they are listed here so that the
   # privileged ones are visible in review. ServerMembers (privileged): welcome, moderation,
@@ -36,14 +36,12 @@ spec:
     - name: welcome
       source: cicord/welcome
       version: ^0.1.0
-      grants: [discord.messages.send, discord.channels.read, discord.members.read,
-               discord.roles.assign, discord.dm.send, portal.links, storage.kv]
+      grants: [discord.messages.send, discord.channels.read, discord.members.read, discord.roles.assign, discord.dm.send, portal.links, storage.kv]
       config:
         channel: general
         message: "Welcome {member} to {server}! Grab your roles in #welcome, and ask anything in #help."
         autoRole: member
-        dmOnboarding: false       # no DM: there is no portal onboarding page on this server
-
+        dmOnboarding: false # no DM: there is no portal onboarding page on this server
     # Server events in #mod-log (joins with account age, leaves, roles, nicknames, deletions).
     - name: audit-log
       source: cicord/audit-log
@@ -53,15 +51,13 @@ spec:
         channel: mod-log
         ignoredChannels: [staff, mod-log]
         events:
-          moderation: false       # the moderation plugin already posts each case to #mod-log
+          moderation: false # the moderation plugin already posts each case to #mod-log
           polls: false
-
     # Opt-in roles panel in #welcome. Never list a role with permissions here.
     - name: reaction-roles
       source: cicord/reaction-roles
       version: ^0.1.0
-      grants: [discord.messages.send, discord.messages.read, discord.channels.read,
-               discord.roles.assign, discord.members.read, discord.reactions.manage, storage.kv]
+      grants: [discord.messages.send, discord.messages.read, discord.channels.read, discord.roles.assign, discord.members.read, discord.reactions.manage, storage.kv]
       config:
         panels:
           - name: opt-in
@@ -79,7 +75,6 @@ spec:
                 label: Plugin author
                 emoji: "🧩"
                 description: You write Cicord plugins
-
     # Private tickets with the staff (reports, private questions). Panel in #welcome, ticket
     # channels in the Tickets category, a summary of each closed ticket in #mod-log.
     - name: tickets
@@ -89,8 +84,7 @@ spec:
       # the queue. discord.members.read lists the staff (role.members(), ServerMembers); the
       # staff's conversation view reads ticket channels (MessageContent): both intents are
       # already enabled for this bot.
-      grants: [discord.messages.send, discord.messages.read, discord.channels.read,
-               discord.channels.manage, discord.members.read, storage.kv, portal.routes]
+      grants: [discord.messages.send, discord.messages.read, discord.channels.read, discord.channels.manage, discord.members.read, storage.kv, portal.routes]
       config:
         panelChannel: welcome
         category: tickets
@@ -101,38 +95,32 @@ spec:
           description: Report a member or a message, or ask something you would rather not post in public. Only you, the maintainers and the moderators see a ticket. Security vulnerabilities go to GitHub (SECURITY.md), not here.
           buttonLabel: Open a ticket
         maxOpenPerMember: 1
-
     # /warn, /timeout, /kick, /ban, escalation and flood protection. Cases are logged to #mod-log.
     # A moderator can only act on members whose highest role is below theirs, never on staff
     # (only an admin can) nor on the server owner.
     - name: moderation
       source: cicord/moderation
       version: ^0.1.1
-      grants: [discord.messages.send, discord.messages.manage, discord.channels.read,
-               discord.members.read, discord.members.moderate, discord.dm.send, storage.kv,
-               http.fetch, portal.routes, events.publish]
+      grants: [discord.messages.send, discord.messages.manage, discord.channels.read, discord.members.read, discord.members.moderate, discord.dm.send, storage.kv, http.fetch, portal.routes, events.publish]
       config:
         logChannel: mod-log
         warningDays: 30
         escalation:
-          - { warnings: 3, action: timeout, durationMinutes: 60 }
-          - { warnings: 5, action: kick }
+          - {warnings: 3, action: timeout, durationMinutes: 60}
+          - {warnings: 5, action: kick}
         flood:
           exemptRoles: [maintainer, moderator]
         # Joins, leaves and member updates are logged by audit-log (same channel).
-        log: { joins: false, leaves: false, updates: false }
-
+        log: {joins: false, leaves: false, updates: false}
     # /poll in #general and #development. Members can only ping a member or a mentionable role;
     # maintainers and moderators can ping any role. @everyone never notifies.
     - name: polls
       source: cicord/polls
       version: ^0.1.1
-      grants: [discord.messages.send, discord.messages.read, discord.channels.read,
-               discord.threads.manage, storage.kv, scheduler, events.publish, portal.routes]
+      grants: [discord.messages.send, discord.messages.read, discord.channels.read, discord.threads.manage, storage.kv, scheduler, events.publish, portal.routes]
       config:
         channels: [general, development]
         managerRoles: [maintainer, moderator]
-
     # Release notes of cicord/cicord in #changelog, pinging the opt-in Changelog ping role
     # (only that role: it is not mentionable by members). Checked every 15 minutes, without a
     # GitHub token (4 requests per hour, well under GitHub's 60 per hour).
@@ -147,4 +135,26 @@ spec:
             mentionRole: changelog-ping
             label: Cicord
         pollMinutes: 15
-        announceExisting: false   # announce releases published from now on only
+        announceExisting: false # announce releases published from now on only
+    - name: voice-rooms
+      source: ../../plugins/voice-rooms
+      grants:
+        - discord.channels.read
+        - discord.channels.manage
+        - discord.voice.move
+        - discord.members.read
+        - storage.kv
+        - scheduler
+      config:
+        hubs:
+          - allowedRoles:
+              - maintainer
+            channel: ""
+            name: "🔊 {member}'s channel"
+            ownerPermissions:
+              - ViewChannel
+              - Connect
+              - Speak
+              - Stream
+              - MoveMembers
+            userLimit: 0
