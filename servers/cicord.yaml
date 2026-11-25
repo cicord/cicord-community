@@ -79,6 +79,9 @@ spec:
                     ManageNicknames, KickMembers, BanMembers, ModerateMembers, ViewAuditLog,
                     ViewServerInsights, MentionEveryone, CreateInstantInvite, MuteMembers,
                     DeafenMembers, MoveMembers, PrioritySpeaker]
+      # Who holds it, reviewed in git (additive: Cicord gives the role, never removes it).
+      members:
+        - "363809724023701504"   # NPjonath (pandawan1), project lead
     moderator:
       name: Moderator
       color: "#eb459e"
