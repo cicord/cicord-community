@@ -58,11 +58,11 @@ plugins:
             - events.publish
             - portal.routes
     cicord/reaction-roles:
-        version: 0.1.0
+        version: 0.1.1
         repo: https://github.com/cicord/cicord-plugins
         path: plugins/reaction-roles
-        commit: 5287d31b787c56f4aff6d7c6dd1e782935c29c1a
-        integrity: sha256-kKvaGOm5ggIR+pk/B2mUvX1SxpWSl05QNkDAHw/3NeU=
+        commit: bc3f6471beed6176282c838723e8812e4a78b107
+        integrity: sha256-ejPDCQbF/s9s4qVbJs7qkKBheOBanI1sKGAOR+gmzbI=
         capabilities:
             - discord.messages.send
             - discord.messages.read
