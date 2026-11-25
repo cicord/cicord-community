@@ -24,14 +24,14 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version: stable
-      # Until binary releases exist.
-      - run: go install github.com/cicord/cicord/cmd/cicord@latest
+      # The Cicord version that generated this portal.
+      - run: go install github.com/cicord/cicord/cmd/cicord@v0.1.4
       - name: The plugin route types match the plugins (src/cicord-routes.d.ts)
         working-directory: .
         run: cicord portal typegen --check --out portal/src/cicord-routes.d.ts
       - uses: pnpm/action-setup@v6
         with:
-          version: 10
+          version: 12
       - uses: actions/setup-node@v7
         with:
           node-version: 26

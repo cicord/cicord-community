@@ -6,3 +6,8 @@ overrides:
   "@cicord/react": file:vendor/cicord-react-0.1.4.tgz
   "@cicord/ui": file:vendor/cicord-ui-0.1.4.tgz
   vite: npm:@voidzero-dev/vite-plus-core@8.3.8000
+peerDependencyRules:
+  allowAny:
+    - vite
+  allowedVersions:
+    vite: "*"
