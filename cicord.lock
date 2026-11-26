@@ -2,17 +2,19 @@
 lockVersion: 1
 plugins:
     cicord/audit-log:
-        version: 0.1.0
+        version: 0.2.0
         repo: https://github.com/cicord/cicord-plugins
         path: plugins/audit-log
-        commit: 5287d31b787c56f4aff6d7c6dd1e782935c29c1a
-        integrity: sha256-28DD+a7s9ODRh8AGcBxJ0JoANlDfzZx/QflQ9uXfQ0I=
+        commit: 31266d539edfb9e65a7c355ba168f4e5e58be528
+        integrity: sha256-9yKrBhUR38p7TCwfj3CocQLesfyglTxh+cuspRWhgtU=
         capabilities:
             - discord.messages.send
+            - discord.messages.read
             - discord.channels.read
+            - discord.auditlog.read
             - storage.kv
             - scheduler
-            - events.subscribe
+            - portal.routes
     cicord/github-releases:
         version: 0.1.0
         repo: https://github.com/cicord/cicord-plugins

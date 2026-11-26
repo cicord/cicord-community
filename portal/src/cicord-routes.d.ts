@@ -3,11 +3,34 @@
 // @cicord/client (`client.routes(plugin, …)`) and @cicord/react (`useRouteQuery`,
 // `useRouteMutation`). `cicord portal build` regenerates it; see https://cicord.dev/docs/portal/custom-portal/.
 //
+//   audit-log 0.2.0 (cicord/audit-log): 2 route(s), typed
 //   moderation 0.1.1 (cicord/moderation): 2 route(s), untyped (no spec.routes.types)
 //   polls 0.1.1 (cicord/polls): 1 route(s), typed
 //   tickets 0.2.1 (cicord/tickets): 11 route(s), typed
 
 import type { RouteEntry } from "@cicord/client";
+
+// Contract of audit-log (spec.routes.types), copied verbatim.
+declare namespace cicord_audit_log {
+  export type AuditObservation = {
+    id: string;
+    at: number;
+    category: string;
+    text: string;
+    excerpt?: string;
+  };
+  export type SearchResult = { items: AuditObservation[]; cursor?: string };
+  export interface Routes {
+    "GET /search": {
+      query: { q?: string; member?: string; channel?: string; category?: string; cursor?: string };
+      response: SearchResult;
+    };
+    "GET /export": {
+      query: { q?: string; member?: string; channel?: string; category?: string; cursor?: string };
+      response: SearchResult;
+    };
+  }
+}
 
 // Contract of polls (spec.routes.types), copied verbatim.
 declare namespace cicord_polls {
@@ -229,6 +252,10 @@ declare namespace cicord_tickets {
 
 declare module "@cicord/client" {
   interface PluginRouteRegistry {
+    "audit-log": {
+      "GET /export": RouteEntry<"moderator", cicord_audit_log.Routes, "GET /export">;
+      "GET /search": RouteEntry<"moderator", cicord_audit_log.Routes, "GET /search">;
+    };
     "moderation": {
       "DELETE /warnings/:userId": RouteEntry<"admin">;
       "GET /warnings/:userId": RouteEntry<"moderator">;

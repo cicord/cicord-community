@@ -47,8 +47,9 @@ spec:
     # Server events in #mod-log (joins with account age, leaves, roles, nicknames, deletions).
     - name: audit-log
       source: cicord/audit-log
-      version: ^0.1.0
-      grants: [discord.messages.send, discord.channels.read, storage.kv, scheduler, events.subscribe]
+      version: ^0.2.0
+      grants: [discord.messages.send, discord.channels.read, storage.kv, scheduler, events.subscribe,
+               discord.messages.read, discord.auditlog.read, portal.routes]
       config:
         channel: mod-log
         ignoredChannels: [staff, mod-log]
