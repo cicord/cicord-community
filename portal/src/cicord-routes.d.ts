@@ -4,7 +4,7 @@
 // `useRouteMutation`). `cicord portal build` regenerates it; see https://cicord.dev/docs/portal/custom-portal/.
 //
 //   audit-log 0.2.0 (cicord/audit-log): 2 route(s), typed
-//   moderation 0.1.1 (cicord/moderation): 2 route(s), untyped (no spec.routes.types)
+//   moderation 0.3.0 (cicord/moderation): 11 route(s), untyped (no spec.routes.types)
 //   polls 0.1.1 (cicord/polls): 1 route(s), typed
 //   tickets 0.2.1 (cicord/tickets): 11 route(s), typed
 
@@ -257,8 +257,17 @@ declare module "@cicord/client" {
       "GET /search": RouteEntry<"moderator", cicord_audit_log.Routes, "GET /search">;
     };
     "moderation": {
+      "DELETE /quarantines/:id/roles/:role": RouteEntry<"moderator">;
       "DELETE /warnings/:userId": RouteEntry<"admin">;
+      "GET /appeal": RouteEntry<"scoped">;
+      "GET /appeals": RouteEntry<"moderator">;
+      "GET /cases": RouteEntry<"moderator">;
+      "GET /members/:id": RouteEntry<"member">;
+      "GET /stats/moderators": RouteEntry<"moderator">;
       "GET /warnings/:userId": RouteEntry<"moderator">;
+      "POST /appeals": RouteEntry<"scoped">;
+      "POST /appeals/:id/decision": RouteEntry<"moderator">;
+      "POST /scope/renew": RouteEntry<"scoped">;
     };
     "polls": {
       "GET /polls/:id": RouteEntry<"public", cicord_polls.Routes, "GET /polls/:id">;

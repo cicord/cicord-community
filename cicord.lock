@@ -28,14 +28,17 @@ plugins:
             - scheduler
             - http.fetch
     cicord/moderation:
-        version: 0.1.1
+        version: 0.3.0
         repo: https://github.com/cicord/cicord-plugins
         path: plugins/moderation
-        commit: 448db6cdc70f6763aea8de644b74334ceb458d2d
-        integrity: sha256-b/GkwwN3XXN1MYjtuA1rTj1Q/+iVyymv41Wol+0V1Y8=
+        commit: 31266d539edfb9e65a7c355ba168f4e5e58be528
+        integrity: sha256-mJsT+MeCL3p0MkQ9hgWfeBOEQhrN9YuceMMre6u4em0=
         capabilities:
+            - discord.auditlog.read
             - discord.messages.send
             - discord.messages.manage
+            - scheduler
+            - discord.messages.read
             - discord.channels.read
             - discord.members.read
             - discord.members.moderate
