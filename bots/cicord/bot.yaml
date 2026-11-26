@@ -35,7 +35,7 @@ spec:
     # Greets new members in #general and gives them the Member role.
     - name: welcome
       source: cicord/welcome
-      version: ^0.1.0
+      version: ^0.2.0
       grants: [discord.messages.send, discord.channels.read, discord.members.read,
                discord.roles.assign, discord.dm.send, portal.links, storage.kv]
       config:
@@ -60,7 +60,7 @@ spec:
     # Opt-in roles panel in #welcome. Never list a role with permissions here.
     - name: reaction-roles
       source: cicord/reaction-roles
-      version: ^0.1.0
+      version: ^0.2.0
       grants: [discord.messages.send, discord.messages.read, discord.channels.read,
                discord.roles.assign, discord.members.read, discord.reactions.manage, storage.kv]
       config:
@@ -85,13 +85,14 @@ spec:
     # channels in the Tickets category, a summary of each closed ticket in #mod-log.
     - name: tickets
       source: cicord/tickets
-      version: ^0.2.0
+      version: ^0.4.0
       # 0.2 serves the community portal (portal/): members follow and open tickets, staff run
       # the queue. discord.members.read lists the staff (role.members(), ServerMembers); the
       # staff's conversation view reads ticket channels (MessageContent): both intents are
       # already enabled for this bot.
       grants: [discord.messages.send, discord.messages.read, discord.channels.read,
-               discord.channels.manage, discord.members.read, storage.kv, portal.routes]
+               discord.channels.manage, discord.members.read, storage.kv, portal.routes,
+               events.publish, scheduler, portal.links]
       config:
         panelChannel: welcome
         category: tickets
@@ -157,7 +158,7 @@ spec:
     # (rename, limit, lock, permit, kick, transfer, claim); maintainers and moderators too.
     - name: voice-rooms
       source: cicord/voice-rooms
-      version: ^0.1.0
+      version: ^0.2.0
       grants: [discord.channels.read, discord.channels.manage, discord.voice.move,
                discord.members.read, storage.kv, scheduler]
       config:

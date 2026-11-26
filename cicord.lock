@@ -63,11 +63,11 @@ plugins:
             - events.publish
             - portal.routes
     cicord/reaction-roles:
-        version: 0.1.1
+        version: 0.2.0
         repo: https://github.com/cicord/cicord-plugins
         path: plugins/reaction-roles
-        commit: bc3f6471beed6176282c838723e8812e4a78b107
-        integrity: sha256-ejPDCQbF/s9s4qVbJs7qkKBheOBanI1sKGAOR+gmzbI=
+        commit: 31266d539edfb9e65a7c355ba168f4e5e58be528
+        integrity: sha256-xSGyaxI0lIYo9mqsnILKkFAkl4ei23DPwxQ1WpSLY+s=
         capabilities:
             - discord.messages.send
             - discord.messages.read
@@ -77,11 +77,11 @@ plugins:
             - discord.reactions.manage
             - storage.kv
     cicord/tickets:
-        version: 0.2.1
+        version: 0.4.0
         repo: https://github.com/cicord/cicord-plugins
         path: plugins/tickets
-        commit: bc3f6471beed6176282c838723e8812e4a78b107
-        integrity: sha256-/BC7+fMcBxT8CYYD6KEX37zMSkhUymSST8447jY+p+I=
+        commit: 31266d539edfb9e65a7c355ba168f4e5e58be528
+        integrity: sha256-henaTJm/YLbF662NRCzXGlz8TbWQY/Bpl1SGipzvIHU=
         capabilities:
             - discord.messages.send
             - discord.messages.read
@@ -90,12 +90,15 @@ plugins:
             - discord.members.read
             - storage.kv
             - portal.routes
+            - events.publish
+            - scheduler
+            - portal.links
     cicord/voice-rooms:
-        version: 0.1.0
+        version: 0.2.0
         repo: https://github.com/cicord/cicord-plugins.git
         path: plugins/voice-rooms
-        commit: 6ee54eb689ff15d487ed8398b3948f31036d0093
-        integrity: sha256-fJLjPqV0WUmVE9O+tOv0Bqz/faE2fEj9U73U07YLY0w=
+        commit: 31266d539edfb9e65a7c355ba168f4e5e58be528
+        integrity: sha256-Vk3FAJHzgKjnuFAhYVV3m8fbgYkMzX1a9uq6d1eRlsY=
         capabilities:
             - discord.channels.read
             - discord.channels.manage
@@ -104,16 +107,13 @@ plugins:
             - storage.kv
             - scheduler
     cicord/welcome:
-        version: 0.1.1
+        version: 0.2.0
         repo: https://github.com/cicord/cicord-plugins
         path: plugins/welcome
-        commit: bc3f6471beed6176282c838723e8812e4a78b107
-        integrity: sha256-vxsCXrf5x3iSHOmR4uhT+F/j7VqdSA3qrvx6yS2aa+4=
+        commit: 31266d539edfb9e65a7c355ba168f4e5e58be528
+        integrity: sha256-rsWocgkLAMSmN3ec/FAk0RYN4/cq03+4SxgXux2IiA0=
         capabilities:
-            - discord.messages.send
-            - discord.channels.read
-            - discord.members.read
-            - discord.roles.assign
-            - discord.dm.send
-            - portal.links
             - storage.kv
+            - discord.messages.send
+            - discord.members.read
+            - discord.channels.read

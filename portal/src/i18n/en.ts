@@ -162,7 +162,12 @@ export const en = {
     opened: "Opened",
     closed: "Closed",
     source: "Opened from",
-    sources: { discord: "Discord", portal: "The portal" },
+    sources: {
+      discord: "Discord",
+      portal: "The portal",
+      modmail: "A direct message to the bot",
+      interop: "Another plugin",
+    },
     status: { open: "Open", closed: "Closed" },
     priorities: { low: "Low", normal: "Normal", high: "High", urgent: "Urgent" },
     noEvents: "Nothing yet.",
