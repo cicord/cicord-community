@@ -121,6 +121,9 @@ describe("staff", () => {
   test("sortQueue: open before closed, urgent first, longest waiting first", () => {
     const t = (id: string, extra: Partial<StaffTicket>): StaffTicket => ({
       id,
+      type: "default",
+      labels: [],
+      rating: null,
       number: Number(id),
       subject: id,
       status: "open",
