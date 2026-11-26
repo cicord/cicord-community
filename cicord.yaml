@@ -4,7 +4,7 @@ kind: Project
 metadata:
   name: cicord
 spec:
-  engine: ">=0.1.10 <0.2.0"  # voice-rooms (voice SDK), emergency pause, health gates
+  engine: ">=0.1.10 <0.3.0"  # voice-rooms (voice SDK), emergency pause, health gates; accepts 0.2.x
   source:
     provider: github
     repo: https://github.com/cicord/cicord-community
