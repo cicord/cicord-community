@@ -48,16 +48,16 @@ plugins:
             - portal.routes
             - events.publish
     cicord/polls:
-        version: 0.1.1
+        version: 0.2.0
         repo: https://github.com/cicord/cicord-plugins
         path: plugins/polls
-        commit: 448db6cdc70f6763aea8de644b74334ceb458d2d
-        integrity: sha256-ixFJF3mCzgNkXXDVB96a2x2f6YP2wjlefPtsXGY9drk=
+        commit: 31266d539edfb9e65a7c355ba168f4e5e58be528
+        integrity: sha256-dPm8+R2Lb24Xp6CIXac0x6oFTGpm+mJWBu4WLkOTLI8=
         capabilities:
             - discord.messages.send
             - discord.messages.read
             - discord.channels.read
-            - discord.threads.manage
+            - discord.members.read
             - storage.kv
             - scheduler
             - events.publish
