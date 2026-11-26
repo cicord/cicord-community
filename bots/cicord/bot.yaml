@@ -139,7 +139,7 @@ spec:
     # GitHub token (4 requests per hour, well under GitHub's 60 per hour).
     - name: github-releases
       source: cicord/github-releases
-      version: ^0.1.0
+      version: ^0.2.0
       grants: [discord.messages.send, discord.channels.read, storage.kv, scheduler, http.fetch]
       config:
         feeds:

@@ -16,11 +16,11 @@ plugins:
             - scheduler
             - portal.routes
     cicord/github-releases:
-        version: 0.1.0
+        version: 0.2.0
         repo: https://github.com/cicord/cicord-plugins
         path: plugins/github-releases
-        commit: 1095d841b81073cfd08725d56f50154b3f5a02a8
-        integrity: sha256-5vLWma5QVngUs4o+fgTGUnpmLzXldrxTc7Vq9FLJARo=
+        commit: 31266d539edfb9e65a7c355ba168f4e5e58be528
+        integrity: sha256-Q9ghlHEJVyCMA6TuW3ii2zXvyqaIFOB5Syw1/gA8dvg=
         capabilities:
             - discord.messages.send
             - discord.channels.read
