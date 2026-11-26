@@ -108,10 +108,11 @@ spec:
     # (only an admin can) nor on the server owner.
     - name: moderation
       source: cicord/moderation
-      version: ^0.1.1
+      version: ^0.3.0
       grants: [discord.messages.send, discord.messages.manage, discord.channels.read,
                discord.members.read, discord.members.moderate, discord.dm.send, storage.kv,
-               http.fetch, portal.routes, events.publish]
+               http.fetch, portal.routes, events.publish, discord.auditlog.read, scheduler,
+               discord.messages.read]
       config:
         logChannel: mod-log
         warningDays: 30
