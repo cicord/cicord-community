@@ -128,9 +128,10 @@ spec:
     # maintainers and moderators can ping any role. @everyone never notifies.
     - name: polls
       source: cicord/polls
-      version: ^0.1.1
+      version: ^0.2.0
       grants: [discord.messages.send, discord.messages.read, discord.channels.read,
-               discord.threads.manage, storage.kv, scheduler, events.publish, portal.routes]
+               discord.threads.manage, storage.kv, scheduler, events.publish, portal.routes,
+               discord.members.read]
       config:
         channels: [general, development]
         managerRoles: [maintainer, moderator]

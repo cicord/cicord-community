@@ -5,7 +5,7 @@
 //
 //   audit-log 0.2.0 (cicord/audit-log): 2 route(s), typed
 //   moderation 0.3.0 (cicord/moderation): 11 route(s), untyped (no spec.routes.types)
-//   polls 0.1.1 (cicord/polls): 1 route(s), typed
+//   polls 0.2.0 (cicord/polls): 1 route(s), typed
 //   tickets 0.2.1 (cicord/tickets): 11 route(s), typed
 
 import type { RouteEntry } from "@cicord/client";
@@ -44,7 +44,7 @@ declare namespace cicord_polls {
   export interface PollResults {
     id: string;
     question: string;
-    status: "open" | "closed";
+    status: "scheduled" | "open" | "closed";
     /** Several choices per voter. */
     multiple: boolean;
     createdAt: string;
